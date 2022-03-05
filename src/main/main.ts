@@ -71,15 +71,29 @@ const createWindow = async () => {
 
   mainWindow = new BrowserWindow({
     show: false,
-    width: 1024,
-    height: 728,
+    width: 1280,
+    height: 720,
     icon: getAssetPath('icon.png'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
+      webviewTag: true,
     },
   });
   mainWindow.setMenuBarVisibility(false);
   mainWindow.loadURL(resolveHtmlPath('index.html'));
+  mainWindow.webContents.session.webRequest.onHeadersReceived(
+    { urls: ['*://*/*'] },
+    (d, c) => {
+      if (d.responseHeaders) {
+        if (d.responseHeaders['X-Frame-Options']) {
+          delete d.responseHeaders['X-Frame-Options'];
+        } else if (d.responseHeaders['x-frame-options']) {
+          delete d.responseHeaders['x-frame-options'];
+        }
+      }
+      c({ cancel: false, responseHeaders: d.responseHeaders });
+    }
+  );
 
   mainWindow.on('ready-to-show', () => {
     if (!mainWindow) {

@@ -5,10 +5,10 @@ import './App.css';
 const Hello = () => {
   return (
     <div className="main_container">
-      <BrowserTab />
-      <BrowserTab />
-      <BrowserTab />
-      <BrowserTab />
+      <BrowserTab url="https://finviz.com/" />
+      <BrowserTab url="https://finviz.com/" />
+      <BrowserTab url="https://finviz.com/" />
+      <BrowserTab url="https://finviz.com/" />
     </div>
   );
 };
