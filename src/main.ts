@@ -1,21 +1,31 @@
 import { app, BrowserWindow } from "electron";
 import * as path from "path";
 
+const env = process.env.NODE_ENV || 'development';
+
+// If development environment
+if (env === 'development') {
+  try {
+    require('electron-reloader')(module, {
+      debug: true,
+      watchRenderer: true
+    });
+  } catch (_) { console.log('Error'); }
+}
+
 function createWindow() {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    height: 600,
+    height: 720,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
     },
-    width: 800,
+    width: 1280
   });
 
   // and load the index.html of the app.
+  mainWindow.removeMenu();
   mainWindow.loadFile(path.join(__dirname, "../index.html"));
-
-  // Open the DevTools.
-  mainWindow.webContents.openDevTools();
 }
 
 // This method will be called when Electron has finished
