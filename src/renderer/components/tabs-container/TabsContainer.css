@@ -1,0 +1,6 @@
+.browser-views-container {
+  display: flex;
+  gap: 5px;
+  height: 100%;
+  width: 100%;
+}

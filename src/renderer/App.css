@@ -3,18 +3,20 @@ body {
   overflow-y: hidden;
   margin: 0;
 }
-.main-container {
+
+#root {
+  height: 100%;
+  width: 100%;
+}
+
+.app-container {
   display: flex;
   flex-direction: column;
   height: 100%;
 }
-.contents {
+.content-container {
   height: 100%;
   width: 100%;
-}
-.main_container {
-  display: flex;
-  height: 100%;
   background: linear-gradient(
     200.96deg,
     #fedc2a -29.09%,
@@ -22,6 +24,7 @@ body {
     #7a2c9e 129.35%
   );
 }
+
 .footer {
   background: linear-gradient(
     200.96deg,

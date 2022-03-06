@@ -14,6 +14,7 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
+import { UserData } from './UserData';
 
 app.disableHardwareAcceleration();
 
@@ -27,10 +28,35 @@ export default class AppUpdater {
 
 let mainWindow: BrowserWindow | null = null;
 
-ipcMain.on('ipc-example', async (event, arg) => {
-  const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
-  console.log(msgTemplate(arg));
-  event.reply('ipc-example', msgTemplate('pong'));
+ipcMain.on('pasco/maximize', (event, windowId) => {
+  const browserWindow = windowId
+    ? BrowserWindow.fromId(windowId)
+    : BrowserWindow.fromWebContents(event.sender);
+  if (browserWindow?.isMaximizable()) {
+    if (browserWindow.isMaximized()) {
+      browserWindow.unmaximize();
+    } else {
+      browserWindow.maximize();
+    }
+  }
+});
+
+ipcMain.on('pasco/minimize', (event, windowId) => {
+  const browserWindow = windowId
+    ? BrowserWindow.fromId(windowId)
+    : BrowserWindow.fromWebContents(event.sender);
+  browserWindow?.minimize();
+});
+
+ipcMain.on('pasco/close', (event, windowId) => {
+  const browserWindow = windowId
+    ? BrowserWindow.fromId(windowId)
+    : BrowserWindow.fromWebContents(event.sender);
+  browserWindow?.close();
+});
+
+ipcMain.on('pasco/getUser', (event, windowId) => {
+  event.sender.send('pasco/userData', new UserData());
 });
 
 if (process.env.NODE_ENV === 'production') {
@@ -79,9 +105,11 @@ const createWindow = async () => {
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       webviewTag: true,
+      nodeIntegration: true,
+      contextIsolation: false,
     },
     transparent: true,
-    titleBarStyle: 'hidden'
+    titleBarStyle: 'hidden',
   });
   mainWindow.loadURL(resolveHtmlPath('index.html'));
   mainWindow.webContents.session.webRequest.onHeadersReceived(

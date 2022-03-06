@@ -7,13 +7,13 @@
 }
 .url_bar_container {
   display: flex;
+  align-items: center;
   padding: 10px;
 }
 .url_bar {
   border-radius: 19px;
   width: 100%;
   border-color: #ede0e0;
-  border-bottom-style: hidden;
   border-style: solid;
   font-size: 14px;
   padding: 6px;
@@ -21,6 +21,10 @@
 }
 .url_bar:focus {
   outline: none;
+}
+.url_bar_button {
+  width: 20px;
+  height: 20px;
 }
 .web_view {
   width: 100%;

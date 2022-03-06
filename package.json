@@ -214,8 +214,10 @@
   },
   "dependencies": {
     "electron-debug": "^3.2.0",
+    "electron-drag": "^2.0.0",
     "electron-log": "^4.4.4",
     "electron-updater": "^4.6.5",
+    "eslint": "^8.10.0",
     "history": "^5.2.0",
     "react": "^17.0.2",
     "react-custom-scroll": "^4.4.0",
