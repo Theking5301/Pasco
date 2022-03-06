@@ -1,7 +1,9 @@
-import { app, BrowserWindow, screen } from 'electron';
+import { app, BrowserWindow, screen, ipcMain } from 'electron';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as url from 'url';
+import * as electron from 'electron';
+import { UserData } from './models/UserData';
 
 let win: BrowserWindow = null;
 const args = process.argv.slice(1),
@@ -16,15 +18,19 @@ function createWindow(): BrowserWindow {
   win = new BrowserWindow({
     x: 0,
     y: 0,
-    width: size.width,
-    height: size.height,
+    width: size.width / 2,
+    height: size.height / 2,
     webPreferences: {
       nodeIntegration: true,
+      nodeIntegrationInSubFrames: true,
       allowRunningInsecureContent: (serve) ? true : false,
-      contextIsolation: false,  // false if you want to run e2e test with Spectron
+      webviewTag: true,
+      contextIsolation: false,
+      webSecurity: false
     },
+    transparent: true,
+    titleBarStyle: 'hidden',
   });
-
 
   if (serve) {
     win.webContents.openDevTools();
@@ -37,7 +43,7 @@ function createWindow(): BrowserWindow {
     let pathIndex = './index.html';
 
     if (fs.existsSync(path.join(__dirname, '../dist/index.html'))) {
-       // Path when running electron in local folder
+      // Path when running electron in local folder
       pathIndex = '../dist/index.html';
     }
 
@@ -59,7 +65,45 @@ function createWindow(): BrowserWindow {
   return win;
 }
 
+ipcMain.on('pasco/maximize', (event, windowId) => {
+  const browserWindow = windowId
+    ? BrowserWindow.fromId(windowId)
+    : BrowserWindow.fromWebContents(event.sender);
+  if (browserWindow?.isMaximizable()) {
+    if (browserWindow.isMaximized()) {
+      browserWindow.unmaximize();
+    } else {
+      browserWindow.maximize();
+    }
+  }
+});
+
+ipcMain.on('pasco/minimize', (event, windowId) => {
+  const browserWindow = windowId
+    ? BrowserWindow.fromId(windowId)
+    : BrowserWindow.fromWebContents(event.sender);
+  browserWindow?.minimize();
+});
+
+ipcMain.on('pasco/close', (event, windowId) => {
+  const browserWindow = windowId
+    ? BrowserWindow.fromId(windowId)
+    : BrowserWindow.fromWebContents(event.sender);
+  browserWindow?.close();
+});
+ipcMain.on('windowMoving', (e, { mouseX, mouseY }) => {
+  const { x, y } = electron.screen.getCursorScreenPoint()
+  win.setPosition(x - mouseX, y - mouseY)
+});
+
+ipcMain.on('windowMoved', () => { });
+ipcMain.on('pasco/getUser', (event, windowId) => {
+  event.sender.send('pasco/userData', new UserData());
+});
+
 try {
+  app.commandLine.appendSwitch('disable-site-isolation-trials');
+
   // This method will be called when Electron has finished
   // initialization and is ready to create browser windows.
   // Some APIs can only be used after this event occurs.
