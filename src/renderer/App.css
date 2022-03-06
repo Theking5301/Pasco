@@ -1,73 +1,35 @@
-/*
- * @NOTE: Prepend a `~` to css file paths that are in your node_modules
- *        See https://github.com/webpack-contrib/sass-loader#imports
- */
 body {
-  position: relative;
-  color: white;
   height: 100vh;
+  overflow-y: hidden;
+  margin: 0;
+}
+.main-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.contents {
+  height: 100%;
+  width: 100%;
+}
+.main_container {
+  display: flex;
+  height: 100%;
   background: linear-gradient(
     200.96deg,
     #fedc2a -29.09%,
     #dd5789 51.77%,
     #7a2c9e 129.35%
   );
-  font-family: sans-serif;
-  overflow-y: hidden;
-  justify-content: center;
-  align-items: center;
-  margin: 0;
 }
-.main_container {
-  display: flex;
-  column-gap: 5px;
-  height: 100%;
-}
-.tab_container {
-  height: 100%;
-  flex-grow: 1;
-  background-color: rgba(255, 255, 255, 0.8);
-}
-.url_bar_container {
-  display: flex;
-  padding: 10px;
-}
-.url_bar {
-  border-radius: 19px;
-  width: 100%;
-  border-color: #ede0e0;
-  border-bottom-style: hidden;
-  border-style: solid;
-  font-size: 14px;
-  padding: 6px;
-  color: #545454;
-}
-.url_bar:focus {
-  outline: none;
-}
-.web_view {
-  width: 100%;
-  height: 100%;
-}
-
-::-webkit-scrollbar {
-  width: 17px;
-  height: 17px;
-}
-
-/* Track */
-::-webkit-scrollbar-track {
-  background-color: var(--scroll-bar-track-bg-color);
-  opacity: 0.01;
-}
-
-/* Handle */
-::-webkit-scrollbar-thumb {
-  background: var(--scroll-bar-handle-bg-color);
-  box-shadow: inset 0 0 6px var(--scroll-bar-handle-bg-color);
-  -webkit-box-shadow: inset 0 0 6px var(--scroll-bar-handle-bg-color);
-}
-
-::-webkit-scrollbar-thumb:window-inactive {
-  background: var(--scroll-bar-track-bg-color);
+.footer {
+  background: linear-gradient(
+    200.96deg,
+    #fedc2a -29.09%,
+    #dd5789 51.77%,
+    #7a2c9e 129.35%
+  );
+  height: 20px;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
 }

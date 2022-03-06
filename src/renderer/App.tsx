@@ -1,14 +1,19 @@
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
-import BrowserTab from 'renderer/components/BrowserTab';
+import BrowserWindow from 'renderer/components/BrowserWindow/BrowserWindow';
 import './App.css';
+import Titlebar from './components/titlebar/Titlebar';
 
 const Hello = () => {
   return (
-    <div className="main_container">
-      <BrowserTab url="https://finviz.com/" />
-      <BrowserTab url="https://finviz.com/" />
-      <BrowserTab url="https://finviz.com/" />
-      <BrowserTab url="https://finviz.com/" />
+    <div className="main-container">
+      <Titlebar />
+      <div className="main_container">
+        <BrowserWindow url="https://finviz.com/" />
+        <BrowserWindow url="https://finviz.com/" />
+        <BrowserWindow url="https://finviz.com/" />
+        <BrowserWindow url="https://finviz.com/" />
+      </div>
+      <div className="footer"></div>
     </div>
   );
 };

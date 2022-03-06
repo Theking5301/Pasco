@@ -15,6 +15,8 @@ import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
+app.disableHardwareAcceleration();
+
 export default class AppUpdater {
   constructor() {
     log.transports.file.level = 'info';
@@ -71,15 +73,16 @@ const createWindow = async () => {
 
   mainWindow = new BrowserWindow({
     show: false,
-    width: 1280,
-    height: 720,
+    width: 1920,
+    height: 1080,
     icon: getAssetPath('icon.png'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       webviewTag: true,
     },
+    transparent: true,
+    titleBarStyle: 'hidden'
   });
-  mainWindow.setMenuBarVisibility(false);
   mainWindow.loadURL(resolveHtmlPath('index.html'));
   mainWindow.webContents.session.webRequest.onHeadersReceived(
     { urls: ['*://*/*'] },
