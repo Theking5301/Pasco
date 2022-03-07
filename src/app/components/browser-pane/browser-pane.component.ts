@@ -15,7 +15,9 @@ export class BrowserPaneComponent implements OnInit, AfterViewInit {
   private webview: any;
 
 
-  constructor(private electron: ElectronService, private paneManager: BrowserPaneManagerService) { }
+  constructor(private electron: ElectronService, private paneManager: BrowserPaneManagerService) {
+    this.url = 'https://www.google.com';
+  }
 
   ngOnInit(): void {
 
@@ -25,7 +27,6 @@ export class BrowserPaneComponent implements OnInit, AfterViewInit {
     webviewNative.addEventListener('ipc-message', (e) => {
       console.log(e);
     });
-
     webviewNative.addEventListener('dom-ready', (e) => {
       webviewNative.executeJavaScript('console.log("test")');
       webviewNative.insertCSS(`

@@ -38,13 +38,6 @@ export class TitlebarComponent implements OnInit {
     ipcHandler.send('windowMoving', { windowId: 0, mouseX: this.mouseX, mouseY: this.mouseY });
     this.animationId = requestAnimationFrame(() => this.moveWindow(ipcHandler));
     this.framesMoved++;
-
-    // This is just in case we get stuck, we check if the mouse button is still down.
-    // We wait 10 frames to check just to avoid timing issues across the renderer.
-    if (this.currentMouseButtonDown !== 1 && this.framesMoved > 10) {
-      cancelAnimationFrame(this.animationId);
-      this.framesMoved = 0;
-    }
   }
   private mouseMove(e) {
     this.currentMouseButtonDown = e.buttons !== undefined ? e.buttons : e.which;

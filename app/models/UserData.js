@@ -5,9 +5,8 @@ var UserData = /** @class */ (function () {
     function UserData() {
         this.urls = [
             'https://www.google.com',
-            'https://finviz.com/',
-            'https://finviz.com/',
-            'https://finviz.com/',
+            'https://finviz.com',
+            'https://finviz.com',
         ];
     }
     return UserData;
