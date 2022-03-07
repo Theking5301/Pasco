@@ -31,6 +31,12 @@ export class BrowserPaneContainerComponent implements OnInit, AfterViewChecked {
       this.manager.setPanes(this.panes.toArray());
     }
   }
+
+  public newInstance() {
+    if (this.getTabData()) {
+      this.userService.addInstanceToTab(this.tabId, 'https://www.google.com');
+    }
+  }
   public getTabData(): IBrowserTab {
     return this.tab;
   }

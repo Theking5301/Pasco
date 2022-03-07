@@ -1,14 +1,20 @@
 <div class="url_bar_container">
   <div class='left-button-container'>
-    <button class="url_bar_button">
-      <img class="url_bar_icon" src="assets/icons/back-forward.svg" alt="Close" />
+    <button class="url_bar_button" (click)="back()">
+      <img class="url_bar_icon" src="assets/icons/back-forward.svg" alt="Back" />
     </button>
-    <button class="url_bar_button">
-      <img class="url_bar_icon forward-icon " src="assets/icons/back-forward.svg" alt="Close" />
+    <button class="url_bar_button" (click)="forward()">
+      <img class="url_bar_icon forward-icon " src="assets/icons/back-forward.svg" alt="Forward" />
     </button>
-    <button class="url_bar_button">
-      <img class="url_bar_icon" src="assets/icons/refresh.svg" alt="Close" />
+    <button class="url_bar_button" (click)="refresh()">
+      <img class="url_bar_icon" src="assets/icons/refresh.svg" alt="Refresh" />
     </button>
   </div>
   <input type="text" class="url_bar" value="{{ this.url }}" [(ngModel)]="url" (keyup.enter)="urlSubmitted($event)" />
+
+
+  <button class="close-button" (click)="closeInstance()">
+    <img class="close-icon" src="assets/icons/close-tab.svg" alt="Close Instance" />
+  </button>
+
 </div>

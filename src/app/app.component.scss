@@ -3,9 +3,10 @@
   width         : 100%;
   display       : flex;
   flex-direction: column;
+  border-radius : 8px;
 }
 
 .content-container {
   height: 100%;
-  width : 100%;
+  width : calc(100% + 1px);
 }

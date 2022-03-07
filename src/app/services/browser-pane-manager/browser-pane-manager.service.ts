@@ -10,11 +10,16 @@ import { UserDataService } from '../user-data-service/user-data-service.service'
 export class BrowserPaneManagerService {
   @Output()
   public focusedPaneChanged: EventEmitter<BrowserPaneComponent>;
+  private selectedTabId: string;
   private panes: BrowserPaneComponent[];
   private focusedPane: BrowserPaneComponent;
 
   constructor(private electron: PascoElectronService, private userService: UserDataService) {
     this.focusedPaneChanged = new EventEmitter();
+    this.selectedTabId = userService.getTabs()[0].id;
+  }
+  public setSelectedTabId(tabId: string) {
+    this.selectedTabId = tabId;
   }
   public setPanes(panes: BrowserPaneComponent[]): void {
     this.panes = panes;
@@ -30,5 +35,17 @@ export class BrowserPaneManagerService {
   }
   public navigateFocusedPane(url: string) {
     this.getFocusedPane().navigate(url);
+  }
+  public performBack() {
+    this.getFocusedPane().performBack();
+  }
+  public performForward() {
+    this.getFocusedPane().performForward();
+  }
+  public performRefresh() {
+    this.getFocusedPane().performRefresh();
+  }
+  public removeFocusedPane() {
+    this.userService.removeInstanceFromTab(this.selectedTabId, this.getFocusedPane().id);
   }
 }

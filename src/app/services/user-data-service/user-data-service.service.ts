@@ -43,11 +43,13 @@ export class UserDataService {
         }
       ]
     });
+    this.syncToDataAccess();
   }
   public removeTab(tabId: string) {
     const index = this.getTabIndexFromId(tabId);
     if (index >= 0) {
       this.userData.tabs.splice(index);
+      this.syncToDataAccess();
     }
   }
   public getTabIndexFromId(tabId: string) {
@@ -67,6 +69,7 @@ export class UserDataService {
         id: 'random',
         url
       });
+      this.syncToDataAccess();
     }
   }
 
@@ -74,6 +77,7 @@ export class UserDataService {
     const index = this.getInstanceIndexFromTabById(tabId, instanceId);
     if (index >= 0) {
       this.getTabById(tabId).instances.splice(index);
+      this.syncToDataAccess();
     }
   }
 
@@ -103,6 +107,9 @@ export class UserDataService {
         resolve(undefined);
       });
     });
+  }
+  private syncToDataAccess() {
+    this.electron.ipcRenderer.send('pasco/user-data/update', this.userData);
   }
   private createDefaultUserData(): IUserData {
     return {

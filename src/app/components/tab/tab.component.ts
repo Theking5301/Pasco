@@ -14,16 +14,16 @@ export class TabComponent implements OnInit {
   @Input()
   public name: string;
   @Output()
-  public select: EventEmitter<string>;
+  public tabselected: EventEmitter<string>;
 
   constructor(private userDataService: UserDataService) {
-    this.select = new EventEmitter();
+    this.tabselected = new EventEmitter();
   }
 
   ngOnInit(): void {
   }
   public tabClicked(e): void {
-    this.select.emit(this.tabId);
+    this.tabselected.emit(this.tabId);
   }
   public tabAuxClicked(e): void {
     if (e.button === 1) {

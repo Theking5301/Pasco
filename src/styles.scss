@@ -8,6 +8,10 @@ body {
   overflow     : hidden;
 }
 
+.root {
+  border: 1px solid transparent;
+}
+
 .background {
   border-radius: 8px;
   position     : fixed;

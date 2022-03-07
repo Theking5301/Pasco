@@ -34,4 +34,16 @@ export class NavigationBarComponent implements OnInit {
 
     return url;
   }
+  public forward() {
+    this.paneManager.performForward();
+  }
+  public back() {
+    this.paneManager.performBack();
+  }
+  public refresh() {
+    this.paneManager.performRefresh();
+  }
+  public closeInstance() {
+    this.paneManager.removeFocusedPane();
+  }
 }

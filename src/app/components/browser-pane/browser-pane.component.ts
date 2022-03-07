@@ -10,6 +10,8 @@ import { PascoElectronService } from '../../services/pasco-electron/pasco-electr
 })
 export class BrowserPaneComponent implements OnInit, AfterViewInit {
   @Input()
+  public id: string;
+  @Input()
   public url: string;
   @Output()
   public navigated: EventEmitter<BrowserPaneComponent>;
@@ -84,5 +86,20 @@ export class BrowserPaneComponent implements OnInit, AfterViewInit {
   }
   public focused() {
     return this.paneManager.getFocusedPane() === this;
+  }
+  public performBack() {
+    if (this.domLoaded) {
+      this.webviewNative.goBack();
+    }
+  }
+  public performForward() {
+    if (this.domLoaded) {
+      this.webviewNative.goForward();
+    }
+  }
+  public performRefresh() {
+    if (this.domLoaded) {
+      this.webviewNative.reload();
+    }
   }
 }
