@@ -14,14 +14,17 @@ import { DetailModule } from './detail/detail.module';
 
 import { AppComponent } from './app.component';
 import { TitlebarComponent } from './components/titlebar/titlebar.component';
-import { MultiTabContainerComponent } from './components/multi-tab-container/multi-tab-container.component';
-import { BrowserTabComponent } from './components/browser-tab/browser-tab.component';
+import { BrowserPaneContainerComponent } from './components/browser-pane-container/browser-pane-container.component';
+import { BrowserPaneComponent } from './components/browser-pane/browser-pane.component';
+import { NavigationBarComponent } from './components/navigation-bar/navigation-bar.component';
+import { TabBarComponent } from './components/tab-bar/tab-bar.component';
+import { TabComponent } from './components/tab/tab.component';
 
 // AoT requires an exported function for factories
 const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader => new TranslateHttpLoader(http, './assets/i18n/', '.json');
 
 @NgModule({
-  declarations: [AppComponent, TitlebarComponent, MultiTabContainerComponent, BrowserTabComponent],
+  declarations: [AppComponent, TitlebarComponent, BrowserPaneContainerComponent, BrowserPaneComponent, NavigationBarComponent, TabBarComponent, TabComponent],
   imports: [
     BrowserModule,
     FormsModule,

@@ -1,22 +1,22 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
-import { MultiTabContainerComponent } from './multi-tab-container.component';
+import { BrowserPaneContainerComponent } from './browser-pane-container.component';
 import { TranslateModule } from '@ngx-translate/core';
 import { RouterTestingModule } from '@angular/router/testing';
 
-describe('MultiTabContainerComponent', () => {
-  let component: MultiTabContainerComponent;
-  let fixture: ComponentFixture<MultiTabContainerComponent>;
+describe('BrowserPaneContainerComponent', () => {
+  let component: BrowserPaneContainerComponent;
+  let fixture: ComponentFixture<BrowserPaneContainerComponent>;
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [MultiTabContainerComponent],
+      declarations: [BrowserPaneContainerComponent],
       imports: [TranslateModule.forRoot(), RouterTestingModule]
     }).compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(MultiTabContainerComponent);
+    fixture = TestBed.createComponent(BrowserPaneContainerComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

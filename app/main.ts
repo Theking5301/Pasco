@@ -66,9 +66,7 @@ function createWindow(): BrowserWindow {
 }
 
 ipcMain.on('pasco/maximize', (event, windowId) => {
-  const browserWindow = windowId
-    ? BrowserWindow.fromId(windowId)
-    : BrowserWindow.fromWebContents(event.sender);
+  const browserWindow = windowId ? BrowserWindow.fromId(windowId) : BrowserWindow.fromWebContents(event.sender);
   if (browserWindow?.isMaximizable()) {
     if (browserWindow.isMaximized()) {
       browserWindow.unmaximize();
@@ -91,7 +89,16 @@ ipcMain.on('pasco/close', (event, windowId) => {
     : BrowserWindow.fromWebContents(event.sender);
   browserWindow?.close();
 });
-ipcMain.on('windowMoving', (e, { mouseX, mouseY }) => {
+ipcMain.on('windowMoving', (e, { windowId, mouseX, mouseY }) => {
+  // If we're maximized and moving, unmaximize.
+  const browserWindow = windowId ? BrowserWindow.fromId(windowId) : BrowserWindow.fromWebContents(e.sender);
+  if (browserWindow?.isMaximizable()) {
+    if (browserWindow.isMaximized()) {
+      browserWindow.unmaximize();
+    }
+  }
+
+  // Then move the window.
   const { x, y } = electron.screen.getCursorScreenPoint()
   win.setPosition(x - mouseX, y - mouseY)
 });

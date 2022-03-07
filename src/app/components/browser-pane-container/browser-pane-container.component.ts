@@ -4,11 +4,11 @@ import { UserData } from '../../../../app/models/UserData';
 import { ElectronService } from '../../core/services/electron/electron.service';
 
 @Component({
-  selector: 'pasco-home',
-  templateUrl: './multi-tab-container.component.html',
-  styleUrls: ['./multi-tab-container.component.scss']
+  selector: 'pasco-browser-pane-container',
+  templateUrl: './browser-pane-container.component.html',
+  styleUrls: ['./browser-pane-container.component.scss']
 })
-export class MultiTabContainerComponent implements OnInit {
+export class BrowserPaneContainerComponent implements OnInit {
   private userData: UserData;
   constructor(private router: Router, private electron: ElectronService) {
     this.userData = {

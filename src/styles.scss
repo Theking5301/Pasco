@@ -1,7 +1,9 @@
 /* You can add global styles to this file, and also import other style files */
 html,
 body {
-  height: 100vh;
-  overflow-y: hidden;
-  margin: 0;
+  height       : 100vh;
+  margin       : 0;
+  border-radius: 8px;
+  font-family  : sans-serif;
+  overflow: hidden;
 }

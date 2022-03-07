@@ -1,16 +1,17 @@
 import { Component, Input, ViewChild, OnInit, AfterViewInit } from '@angular/core';
 import { Menu, MenuItem, webFrame } from 'electron';
 import { ElectronService } from '../../core/services/electron/electron.service';
+import { BrowserPaneManagerService } from '../../services/browser-pane-manager.service';
 
 @Component({
-  selector: 'pasco-browser-tab',
-  templateUrl: './browser-tab.component.html',
-  styleUrls: ['./browser-tab.component.scss']
+  selector: 'pasco-browser-pane',
+  templateUrl: './browser-pane.component.html',
+  styleUrls: ['./browser-pane.component.scss']
 })
-export class BrowserTabComponent implements OnInit, AfterViewInit {
+export class BrowserPaneComponent implements OnInit, AfterViewInit {
   @Input() url: string;
   @ViewChild('webview') webview: any;
-  constructor(private electron: ElectronService) { }
+  constructor(private electron: ElectronService, private paneManager: BrowserPaneManagerService) { }
 
   ngOnInit(): void {
 
@@ -18,9 +19,6 @@ export class BrowserTabComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
     const webviewNative = this.webview.nativeElement;
     webviewNative.addEventListener('dom-ready', () => {
-      webviewNative.contentWindow.addEventListener('mouseup', (event) => {
-        console.log(event);
-      });
       webviewNative.insertCSS(`
         ::-webkit-scrollbar {
           width: 12px;
@@ -41,5 +39,9 @@ export class BrowserTabComponent implements OnInit, AfterViewInit {
   }
   private mouseUp(e) {
     console.log(e);
+  }
+  private clicked() {
+    this.paneManager.setFocusedPane(this);
+    console.log("foused");
   }
 }

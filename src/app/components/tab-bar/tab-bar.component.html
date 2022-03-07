@@ -1,0 +1,3 @@
+<div class="tab-bar-container">
+  <pasco-tab *ngFor="let tabId of tabs" [active]="isSelectedTab(tabId)" [tabId]="tabId" (select)="tabSelected($event)"></pasco-tab>
+</div>

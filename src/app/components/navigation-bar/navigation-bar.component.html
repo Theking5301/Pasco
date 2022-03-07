@@ -1,0 +1,15 @@
+<div class="url_bar_container">
+  <div class='left-button-container'>
+    <button class="url_bar_button">
+      <img class="url_bar_icon" src="../../assets/icons/back-forward.svg" alt="Close" />
+    </button>
+    <button class="url_bar_button">
+      <img class="url_bar_icon forward-icon " src="../../assets/icons/back-forward.svg" alt="Close" />
+    </button>
+    <button class="url_bar_button">
+      <img class="url_bar_icon" src="../../assets/icons/refresh.svg" alt="Close" />
+    </button>
+  </div>
+  <input type="text" class="url_bar" value="{{ this.url }}" onChange="{this.urlChange.bind(this)}"
+    onSubmit="{this.urlSubmit.bind(this)}" />
+</div>

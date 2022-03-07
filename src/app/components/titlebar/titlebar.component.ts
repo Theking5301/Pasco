@@ -35,7 +35,7 @@ export class TitlebarComponent implements OnInit {
     cancelAnimationFrame(this.animationId);
   }
   private moveWindow(ipcHandler) {
-    ipcHandler.send('windowMoving', { mouseX: this.mouseX, mouseY: this.mouseY });
+    ipcHandler.send('windowMoving', { windowId: 0, mouseX: this.mouseX, mouseY: this.mouseY });
     this.animationId = requestAnimationFrame(() => this.moveWindow(ipcHandler));
     this.framesMoved++;
 
