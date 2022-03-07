@@ -41,7 +41,7 @@ export class PascoElectronService {
     return this.getDataWithArgs(channel, []);
   }
   public getDataWithArgs<T>(channel: string, ...args: any[]): Promise<IpcResponse<T>> {
-    this.ipcRenderer.send('pasco/get-' + channel, args);
+    this.ipcRenderer.send('pasco/' + channel, args);
     return new Promise((resolve) => {
       this.ipcRenderer.on('pasco/' + channel, (event, data) => {
         resolve(new IpcResponse(data, event));

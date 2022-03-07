@@ -1,3 +1,8 @@
 <div class="tab-bar-container">
-  <pasco-tab *ngFor="let tabId of tabs" [active]="isSelectedTab(tabId)" [tabId]="tabId" (select)="tabSelected($event)"></pasco-tab>
+  <pasco-tab *ngFor="let tab of tabs" [active]="isSelectedTab(tab.id)" [tabId]="tab.id" [name]="tab.name"
+    (select)="tabSelected($event)">
+  </pasco-tab>
+  <button class='new-tab-button' (click)="newTabClicked()">
+    <img class="new-tab-icon" src="assets/icons/new-tab.svg" alt="New Tab" />
+  </button>
 </div>

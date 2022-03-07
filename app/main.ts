@@ -3,11 +3,14 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as url from 'url';
 import * as electron from 'electron';
-import { UserData } from './models/UserData';
+import { UserDataAccess } from './services/user-data-access';
 
 let win: BrowserWindow = null;
 const args = process.argv.slice(1),
   serve = args.some(val => val === '--serve');
+
+const services = [new UserDataAccess()];
+
 
 function createWindow(): BrowserWindow {
 
@@ -25,8 +28,7 @@ function createWindow(): BrowserWindow {
       nodeIntegrationInSubFrames: true,
       allowRunningInsecureContent: (serve) ? true : false,
       webviewTag: true,
-      contextIsolation: false,
-      webSecurity: false
+      contextIsolation: false
     },
     transparent: true,
     titleBarStyle: 'hidden',
@@ -104,20 +106,7 @@ ipcMain.on('windowMoving', (e, { windowId, mouseX, mouseY }) => {
 });
 
 ipcMain.on('windowMoved', () => { });
-ipcMain.on('pasco/get-user-data', (event, windowId) => {
-  if (fs.existsSync('user-data.json')) {
-    const data = fs.readFileSync('user-data.json', 'utf8');
-    let parsed: UserData = JSON.parse(data);
-    event.sender.send('pasco/user-data', parsed);
-  } else {
-    event.sender.send('pasco/user-data', new UserData());
-  }
-});
-ipcMain.on('pasco/set-user-data', (event, data) => {
-  fs.writeFile('user-data.json', JSON.stringify(data, null, 4), (error) => {
 
-  });
-});
 ipcMain.on('pasco/get-platform', (event) => {
   event.sender.send('pasco/platform', process.platform);
 });

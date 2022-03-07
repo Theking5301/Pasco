@@ -1,3 +1,4 @@
-<div class="browser-view-container">
-  <pasco-browser-pane class="pane" *ngFor="let url of getUserData().urls" [url]="url"></pasco-browser-pane>
+<div *ngIf="getTabData()" class="browser-view-container">
+  <pasco-browser-pane class="pane" *ngFor="let instance of getTabData().instances" [url]="instance.url">
+  </pasco-browser-pane>
 </div>

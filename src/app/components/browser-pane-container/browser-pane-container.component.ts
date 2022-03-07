@@ -1,9 +1,10 @@
+/* eslint-disable @angular-eslint/component-selector */
+import { IBrowserTab } from '../../../../app/services/user-data-access';
 import { BrowserPaneManagerService } from './../../services/browser-pane-manager/browser-pane-manager.service';
-import { PascoElectronService } from './../../services/pasco-electron/pasco-electron.service';
-import { AfterViewChecked, Component, OnInit, QueryList, ViewChildren } from '@angular/core';
+import { AfterViewChecked, Component, OnInit, Input, QueryList, ViewChildren } from '@angular/core';
 import { Router } from '@angular/router';
-import { UserData } from '../../../../app/models/UserData';
 import { BrowserPaneComponent } from '../browser-pane/browser-pane.component';
+import { UserDataService } from '../../services/user-data-service/user-data-service.service';
 
 @Component({
   selector: 'pasco-browser-pane-container',
@@ -11,11 +12,15 @@ import { BrowserPaneComponent } from '../browser-pane/browser-pane.component';
   styleUrls: ['./browser-pane-container.component.scss']
 })
 export class BrowserPaneContainerComponent implements OnInit, AfterViewChecked {
+  @Input()
+  public tabId: string;
   @ViewChildren(BrowserPaneComponent)
   private panes: QueryList<BrowserPaneComponent>;
+  private tab: IBrowserTab;
 
-  constructor(private router: Router, private electron: PascoElectronService, private manager: BrowserPaneManagerService) {
-
+  constructor(private router: Router, private manager: BrowserPaneManagerService, private userService: UserDataService) {
+    this.tabId = 'random';
+    this.tab = this.userService.getTabById(this.tabId);
   }
 
   ngOnInit(): void {
@@ -26,7 +31,7 @@ export class BrowserPaneContainerComponent implements OnInit, AfterViewChecked {
       this.manager.setPanes(this.panes.toArray());
     }
   }
-  public getUserData(): UserData {
-    return this.manager.getUserData();
+  public getTabData(): IBrowserTab {
+    return this.tab;
   }
 }

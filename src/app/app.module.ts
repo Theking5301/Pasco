@@ -1,5 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import { APP_INITIALIZER, NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { SharedModule } from './shared/shared.module';
@@ -18,9 +18,14 @@ import { BrowserPaneComponent } from './components/browser-pane/browser-pane.com
 import { NavigationBarComponent } from './components/navigation-bar/navigation-bar.component';
 import { TabBarComponent } from './components/tab-bar/tab-bar.component';
 import { TabComponent } from './components/tab/tab.component';
+import { UserDataService } from './services/user-data-service/user-data-service.service';
 
 // AoT requires an exported function for factories
 const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader => new TranslateHttpLoader(http, './assets/i18n/', '.json');
+
+export function initializeApplication(userData: UserDataService): () => Promise<any> {
+  return (): Promise<any> => userData.initialize();
+}
 
 @NgModule({
   declarations: [AppComponent, TitlebarComponent, BrowserPaneContainerComponent, BrowserPaneComponent, NavigationBarComponent, TabBarComponent, TabComponent],
@@ -39,7 +44,8 @@ const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader => new Transla
       }
     })
   ],
-  providers: [],
+  providers: [
+    { provide: APP_INITIALIZER, useFactory: initializeApplication, deps: [UserDataService], multi: true }],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

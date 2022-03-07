@@ -1,7 +1,8 @@
-import { Injectable, Output, EventEmitter } from '@angular/core';
-import { UserData } from '../../../../app/models/UserData';
+import { Injectable, Output, EventEmitter, Input } from '@angular/core';
+import { IBrowserTab, IUserData } from '../../../../app/services/user-data-access';
 import { BrowserPaneComponent } from '../../components/browser-pane/browser-pane.component';
 import { PascoElectronService } from '../pasco-electron/pasco-electron.service';
+import { UserDataService } from '../user-data-service/user-data-service.service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,14 +12,9 @@ export class BrowserPaneManagerService {
   public focusedPaneChanged: EventEmitter<BrowserPaneComponent>;
   private panes: BrowserPaneComponent[];
   private focusedPane: BrowserPaneComponent;
-  private userData: UserData;
 
-  constructor(private electron: PascoElectronService) {
+  constructor(private electron: PascoElectronService, private userService: UserDataService) {
     this.focusedPaneChanged = new EventEmitter();
-
-    electron.getData<UserData>('user-data').then((response) => {
-      this.userData = response.getData();
-    });
   }
   public setPanes(panes: BrowserPaneComponent[]): void {
     this.panes = panes;
@@ -34,15 +30,5 @@ export class BrowserPaneManagerService {
   }
   public navigateFocusedPane(url: string) {
     this.getFocusedPane().navigate(url);
-
-    this.userData.urls = [];
-    for (const pane of this.panes) {
-      this.userData.urls.push(pane.getUrl());
-    }
-    this.electron.ipcRenderer.send('pasco/set-user-data', this.userData);
-    console.log(this.userData.urls);
-  }
-  public getUserData(): UserData {
-    return this.userData;
   }
 }

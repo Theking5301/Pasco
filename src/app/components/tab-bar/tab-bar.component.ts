@@ -1,25 +1,31 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { IBrowserTab } from '../../../../app/services/user-data-access';
+import { UserDataService } from '../../services/user-data-service/user-data-service.service';
 
 @Component({
   selector: 'pasco-tab-bar',
   templateUrl: './tab-bar.component.html',
-  styleUrls: ['./tab-bar.component.scss']
+  styleUrls: ['./tab-bar.component.scss', '../tab/tab.component.scss',]
 })
 export class TabBarComponent implements OnInit {
-  public selectedTabId: number;
-  public tabs: number[];
-  constructor() {
-    this.selectedTabId = 0;
-    this.tabs = [0, 1, 2, 3, 4, 5];
+  public selectedTabId: string;
+  public tabs: IBrowserTab[];
+
+  constructor(private userService: UserDataService) {
+    this.selectedTabId = 'random';
+    this.tabs = this.userService.getTabs();
   }
 
 
   ngOnInit(): void {
   }
-  public tabSelected(tabId: number): void {
+  public tabSelected(tabId: string): void {
     this.selectedTabId = tabId;
   }
-  public isSelectedTab(tabId: number): boolean {
+  public isSelectedTab(tabId: string): boolean {
     return this.selectedTabId === tabId;
+  }
+  public newTabClicked() {
+    this.userService.addTab('test');
   }
 }
