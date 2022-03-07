@@ -7,9 +7,7 @@
     "name": "Amine Sebastian",
     "email": "amine@suburbandigital.com"
   },
-  "keywords": [
-
-  ],
+  "keywords": [],
   "main": "app/main.js",
   "private": true,
   "scripts": {
@@ -31,7 +29,9 @@
     "e2e": "npm run build:prod && playwright test -c e2e/playwright.config.ts e2e/",
     "e2e:show-trace": "playwright show-trace e2e/tracing/trace.zip",
     "version": "conventional-changelog -i CHANGELOG.md -s -r 0 && git add CHANGELOG.md",
-    "lint": "ng lint"
+    "lint": "ng lint",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
   },
   "dependencies": {
     "@angular/common": "13.2.4",

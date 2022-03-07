@@ -1,8 +1,7 @@
 import { Component } from '@angular/core';
-import { ElectronService } from './core/services';
 import { TranslateService } from '@ngx-translate/core';
 import { APP_CONFIG } from '../environments/environment';
-import { IpcComs } from './utils/IpcComs';
+import { PascoElectronService } from './services/pasco-electron/pasco-electron.service';
 
 @Component({
   selector: 'app-root',
@@ -11,10 +10,10 @@ import { IpcComs } from './utils/IpcComs';
 })
 export class AppComponent {
   private platform: string;
-  constructor(private electronService: ElectronService, private translate: TranslateService) {
+  constructor(private electronService: PascoElectronService, private translate: TranslateService) {
     this.translate.setDefaultLang('en');
-    IpcComs.getData('platform', (event, data) => {
-      this.platform = data;
+    electronService.getData('platform').then((response) => {
+      console.log(response);
     });
   }
   public getPlatform(): string {

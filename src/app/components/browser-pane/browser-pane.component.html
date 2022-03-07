@@ -1,5 +1,5 @@
 <div class="pane-container" (click)="clicked()">
-  <webview #webview class="web-view" [ngClass]="{'web-view-focused': focused()}" src="{{ url }}"
-    preload="{{'file://G:/SuburbanDigital/Pasco/src/app/components/browser-tab/preload.js'}}" disablewebsecurity="true">
+  <webview #webview class="web-view" [ngClass]="{'web-view-focused': focused()}" attr.src="{{ url }}"
+    disablewebsecurity="true">
   </webview>
 </div>

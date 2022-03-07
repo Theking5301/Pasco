@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AppComponent } from '../../app.component';
-import { ElectronService } from '../../core/services/electron/electron.service';
+import { PascoElectronService } from '../../services/pasco-electron/pasco-electron.service';
 
 @Component({
   selector: 'pasco-titlebar',
@@ -13,17 +13,17 @@ export class TitlebarComponent implements OnInit {
   private mouseY;
   private currentMouseButtonDown;
   private framesMoved;
-  private showWindowControls: boolean;
+  public showWindowControls: boolean;
 
 
-  constructor(private electron: ElectronService, private app: AppComponent) {
+  constructor(private electron: PascoElectronService, private app: AppComponent) {
     this.framesMoved = 0;
     this.showWindowControls = app.getPlatform() !== 'darwin';
   }
 
   ngOnInit(): void {
   }
-  private titleBarMouseDown(e) {
+  public titleBarMouseDown(e) {
     this.mouseX = e.clientX;
     this.mouseY = e.clientY;
     document.addEventListener('mouseup', this.titleBarMouseUp.bind(this));
@@ -32,32 +32,32 @@ export class TitlebarComponent implements OnInit {
     cancelAnimationFrame(this.animationId);
     this.framesMoved = 0;
   }
-  private titleBarMouseUp(e) {
+  public titleBarMouseUp(e) {
     this.electron.ipcRenderer.send('windowMoved');
     document.removeEventListener('mouseup', this.titleBarMouseUp.bind(this));
     cancelAnimationFrame(this.animationId);
   }
-  private moveWindow(ipcHandler) {
+  public moveWindow(ipcHandler) {
     ipcHandler.send('windowMoving', { windowId: 0, mouseX: this.mouseX, mouseY: this.mouseY });
     this.animationId = requestAnimationFrame(() => this.moveWindow(ipcHandler));
     this.framesMoved++;
   }
-  private mouseMove(e) {
+  public mouseMove(e) {
     this.currentMouseButtonDown = e.buttons !== undefined ? e.buttons : e.which;
   }
-  private titleBarDoubleClick() {
+  public titleBarDoubleClick() {
     this.maximizeRestore();
   }
-  private close() {
+  public close() {
     this.electron.ipcRenderer.send('pasco/close');
   }
-  private minimize() {
+  public minimize() {
     this.electron.ipcRenderer.send('pasco/minimize');
   }
-  private maximizeRestore() {
+  public maximizeRestore() {
     this.electron.ipcRenderer.send('pasco/maximize');
   }
-  private onDoubleClick() {
+  public onDoubleClick() {
     this.electron.ipcRenderer.send('pasco/maximize');
   }
 }

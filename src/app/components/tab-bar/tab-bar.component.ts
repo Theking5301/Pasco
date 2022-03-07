@@ -6,8 +6,8 @@ import { Component, Input, OnInit } from '@angular/core';
   styleUrls: ['./tab-bar.component.scss']
 })
 export class TabBarComponent implements OnInit {
-  private selectedTabId: number;
-  private tabs: number[];
+  public selectedTabId: number;
+  public tabs: number[];
   constructor() {
     this.selectedTabId = 0;
     this.tabs = [0, 1, 2, 3, 4, 5];
@@ -16,10 +16,10 @@ export class TabBarComponent implements OnInit {
 
   ngOnInit(): void {
   }
-  private tabSelected(tabId: number): void {
+  public tabSelected(tabId: number): void {
     this.selectedTabId = tabId;
   }
-  private isSelectedTab(tabId: number): boolean {
+  public isSelectedTab(tabId: number): boolean {
     return this.selectedTabId === tabId;
   }
 }

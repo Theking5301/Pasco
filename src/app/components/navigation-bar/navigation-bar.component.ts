@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { BrowserPaneManagerService } from './../../services/browser-pane-manager/browser-pane-manager.service';
+import { Component, Input, OnInit } from '@angular/core';
 
 @Component({
   selector: 'pasco-navigation-bar',
@@ -6,12 +7,31 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./navigation-bar.component.scss']
 })
 export class NavigationBarComponent implements OnInit {
-  private url: string;
-  constructor() {
-    this.url = 'https://www.flaticon.com/premium-icon/refresh_5794910?related_id=5794910&origin=pack';
+  public url: string;
+
+  constructor(private paneManager: BrowserPaneManagerService) {
+    if (this.paneManager.getFocusedPane() !== undefined) {
+      this.url = this.paneManager.getFocusedPane().getUrl();
+    }
+    this.paneManager.focusedPaneChanged.subscribe((pane) => {
+      this.url = this.paneManager.getFocusedPane().getUrl();
+    });
   }
 
   ngOnInit(): void {
   }
+  public urlSubmitted(e) {
+    if (this.paneManager.getFocusedPane() !== undefined) {
+      this.url = this.formatUrl(this.url);
+      this.paneManager.navigateFocusedPane(this.url);
+    }
+  }
+  public formatUrl(url: string): string {
+    url = url.trim();
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      url = 'https://' + url;
+    }
 
+    return url;
+  }
 }

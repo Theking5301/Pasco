@@ -7,11 +7,11 @@ import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 })
 export class TabComponent implements OnInit {
   @Input()
-  private active: boolean;
+  public active: boolean;
   @Input()
-  private tabId: number;
+  public tabId: number;
   @Output()
-  private select: EventEmitter<number>;
+  public select: EventEmitter<number>;
 
   constructor() {
     this.select = new EventEmitter();
@@ -19,7 +19,7 @@ export class TabComponent implements OnInit {
 
   ngOnInit(): void {
   }
-  private tabClicked(): void {
+  public tabClicked(): void {
     this.select.emit(this.tabId);
   }
 }

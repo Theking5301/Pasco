@@ -1,7 +1,7 @@
-import { Component, Input, ViewChild, OnInit, AfterViewInit } from '@angular/core';
+import { Component, Input, ViewChild, OnInit, AfterViewInit, EventEmitter, Output } from '@angular/core';
 import { Menu, MenuItem, webFrame } from 'electron';
-import { ElectronService } from '../../core/services/electron/electron.service';
-import { BrowserPaneManagerService } from '../../services/browser-pane-manager.service';
+import { BrowserPaneManagerService } from '../../services/browser-pane-manager/browser-pane-manager.service';
+import { PascoElectronService } from '../../services/pasco-electron/pasco-electron.service';
 
 @Component({
   selector: 'pasco-browser-pane',
@@ -10,26 +10,41 @@ import { BrowserPaneManagerService } from '../../services/browser-pane-manager.s
 })
 export class BrowserPaneComponent implements OnInit, AfterViewInit {
   @Input()
-  private url: string;
+  public url: string;
+  @Output()
+  public navigated: EventEmitter<BrowserPaneComponent>;
+
   @ViewChild('webview')
   private webview: any;
+  private webviewNative: any;
+  private domLoaded: boolean;
+  private firstTimeLoaded: boolean;
 
 
-  constructor(private electron: ElectronService, private paneManager: BrowserPaneManagerService) {
+  constructor(private electron: PascoElectronService, private paneManager: BrowserPaneManagerService) {
     this.url = 'https://www.google.com';
+    this.domLoaded = false;
+    this.navigated = new EventEmitter();
   }
 
   ngOnInit(): void {
 
   }
   ngAfterViewInit(): void {
-    const webviewNative = this.webview.nativeElement;
-    webviewNative.addEventListener('ipc-message', (e) => {
-      console.log(e);
-    });
-    webviewNative.addEventListener('dom-ready', (e) => {
-      webviewNative.executeJavaScript('console.log("test")');
-      webviewNative.insertCSS(`
+    this.webviewNative = this.webview.nativeElement;
+    this.webviewNative.addEventListener('dom-ready', (e) => {
+      // If this is the SECOND or more navigate, then we raise the event.
+      if (this.firstTimeLoaded) {
+        this.navigated.emit(this);
+      }
+
+      // Capture the loaded state.
+      this.domLoaded = true;
+      this.firstTimeLoaded = true;
+      this.webviewNative.executeJavaScript('console.log("test")');
+
+      // Modify the scrollbars.
+      this.webviewNative.insertCSS(`
         ::-webkit-scrollbar {
           width: 12px;
           height: 12px;
@@ -47,14 +62,27 @@ export class BrowserPaneComponent implements OnInit, AfterViewInit {
         `);
     });
   }
-  private mouseUp(e) {
+  public navigate(url: string): void {
+    if (this.domLoaded) {
+      this.domLoaded = false;
+      this.url = url;
+      return this.webviewNative.loadURL(url);
+    }
+  }
+  public getUrl(): string {
+    if (this.domLoaded) {
+      return this.webviewNative.getURL();
+    } else {
+      return this.url;
+    }
+  }
+  public mouseUp(e) {
     console.log(e);
   }
-  private clicked() {
+  public clicked() {
     this.paneManager.setFocusedPane(this);
-    console.log("foused");
   }
-  private focused() {
+  public focused() {
     return this.paneManager.getFocusedPane() === this;
   }
 }

@@ -1,7 +1,4 @@
 import { Injectable } from '@angular/core';
-
-// If you import a module but never use any of the imported values other than as TypeScript types,
-// the resulting javascript file will look as if you never imported the module at all.
 import { ipcRenderer, webFrame } from 'electron';
 import * as childProcess from 'child_process';
 import * as fs from 'fs';
@@ -9,14 +6,13 @@ import * as fs from 'fs';
 @Injectable({
   providedIn: 'root'
 })
-export class ElectronService {
-  ipcRenderer: typeof ipcRenderer;
-  webFrame: typeof webFrame;
-  childProcess: typeof childProcess;
-  fs: typeof fs;
+export class PascoElectronService {
+  public ipcRenderer: typeof ipcRenderer;
+  public webFrame: typeof webFrame;
+  public childProcess: typeof childProcess;
+  public fs: typeof fs;
 
   constructor() {
-    // Conditional imports
     if (this.isElectron) {
       this.ipcRenderer = window.require('electron').ipcRenderer;
       this.webFrame = window.require('electron').webFrame;
@@ -40,5 +36,26 @@ export class ElectronService {
 
   get isElectron(): boolean {
     return !!(window && window.process && window.process.type);
+  }
+  public getData<T>(channel: string): Promise<IpcResponse<T>> {
+    return this.getDataWithArgs(channel, []);
+  }
+  public getDataWithArgs<T>(channel: string, ...args: any[]): Promise<IpcResponse<T>> {
+    this.ipcRenderer.send('pasco/get-' + channel, args);
+    return new Promise((resolve) => {
+      this.ipcRenderer.on('pasco/' + channel, (event, data) => {
+        resolve(new IpcResponse(data, event));
+      });
+    });
+  }
+}
+
+export class IpcResponse<T> {
+  public constructor(private data: T, private event: any) { }
+  public getData(): T {
+    return this.data;
+  }
+  public getEvent(): any {
+    return this.event;
   }
 }
