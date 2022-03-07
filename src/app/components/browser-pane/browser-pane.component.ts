@@ -9,8 +9,12 @@ import { BrowserPaneManagerService } from '../../services/browser-pane-manager.s
   styleUrls: ['./browser-pane.component.scss']
 })
 export class BrowserPaneComponent implements OnInit, AfterViewInit {
-  @Input() url: string;
-  @ViewChild('webview') webview: any;
+  @Input()
+  private url: string;
+  @ViewChild('webview')
+  private webview: any;
+
+
   constructor(private electron: ElectronService, private paneManager: BrowserPaneManagerService) { }
 
   ngOnInit(): void {
@@ -18,7 +22,12 @@ export class BrowserPaneComponent implements OnInit, AfterViewInit {
   }
   ngAfterViewInit(): void {
     const webviewNative = this.webview.nativeElement;
-    webviewNative.addEventListener('dom-ready', () => {
+    webviewNative.addEventListener('ipc-message', (e) => {
+      console.log(e);
+    });
+
+    webviewNative.addEventListener('dom-ready', (e) => {
+      webviewNative.executeJavaScript('console.log("test")');
       webviewNative.insertCSS(`
         ::-webkit-scrollbar {
           width: 12px;
@@ -43,5 +52,8 @@ export class BrowserPaneComponent implements OnInit, AfterViewInit {
   private clicked() {
     this.paneManager.setFocusedPane(this);
     console.log("foused");
+  }
+  private focused() {
+    return this.paneManager.getFocusedPane() === this;
   }
 }

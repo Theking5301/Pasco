@@ -11,4 +11,7 @@ export class BrowserPaneManagerService {
   public setFocusedPane(pane: BrowserPaneComponent): void {
     this.focusedPane = pane;
   }
+  public getFocusedPane(): BrowserPaneComponent {
+    return this.focusedPane;
+  }
 }
