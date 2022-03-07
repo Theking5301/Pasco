@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import * as url from 'url';
 import * as electron from 'electron';
 import { UserData } from './models/UserData';
+const os = require('os');
 
 let win: BrowserWindow = null;
 const args = process.argv.slice(1),
@@ -106,6 +107,9 @@ ipcMain.on('windowMoving', (e, { windowId, mouseX, mouseY }) => {
 ipcMain.on('windowMoved', () => { });
 ipcMain.on('pasco/getUser', (event, windowId) => {
   event.sender.send('pasco/userData', new UserData());
+});
+ipcMain.on('pasco/getplatform', (event) => {
+  event.sender.send('pasco/platform', os.platform());
 });
 
 try {

@@ -5,7 +5,8 @@
   <div class="nav-bar">
     <pasco-navigation-bar></pasco-navigation-bar>
   </div>
-  <div class="window_control_row" (dblclick)="titleBarDoubleClick()" (mousedown)="titleBarMouseDown($event)">
+  <div class="window_control_row" [style.visibility]="showWindowControls ? 'visible' : 'hidden'"
+    (dblclick)="titleBarDoubleClick()" (mousedown)="titleBarMouseDown($event)">
     <div class="window_spacer"></div>
     <div class="window_control_button_wrapper">
       <button class="window_control_button" (click)="minimize()">

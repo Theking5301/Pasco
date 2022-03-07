@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { AppComponent } from '../../app.component';
 import { ElectronService } from '../../core/services/electron/electron.service';
 
 @Component({
@@ -12,10 +13,12 @@ export class TitlebarComponent implements OnInit {
   private mouseY;
   private currentMouseButtonDown;
   private framesMoved;
+  private showWindowControls: boolean;
 
 
-  constructor(private electron: ElectronService) {
+  constructor(private electron: ElectronService, private app: AppComponent) {
     this.framesMoved = 0;
+    this.showWindowControls = app.getPlatform() !== 'darwin';
   }
 
   ngOnInit(): void {
