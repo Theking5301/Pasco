@@ -1,6 +1,6 @@
 /* eslint-disable @angular-eslint/component-selector */
-import { IBrowserTab } from '../../../../app/services/user-data-access';
-import { BrowserPaneManagerService } from './../../services/browser-pane-manager/browser-pane-manager.service';
+import { IBrowserInstance, IBrowserTab } from '../../../../app/services/user-data-access';
+import { BrowserManagerService } from '../../services/browser-manager/browser-manager.service';
 import { AfterViewChecked, Component, OnInit, Input, QueryList, ViewChildren } from '@angular/core';
 import { Router } from '@angular/router';
 import { BrowserPaneComponent } from '../browser-pane/browser-pane.component';
@@ -9,35 +9,36 @@ import { UserDataService } from '../../services/user-data-service/user-data-serv
 @Component({
   selector: 'pasco-browser-pane-container',
   templateUrl: './browser-pane-container.component.html',
-  styleUrls: ['./browser-pane-container.component.scss']
+  styleUrls: ['./browser-pane-container.component.scss'],
 })
 export class BrowserPaneContainerComponent implements OnInit, AfterViewChecked {
   @Input()
   public tabId: string;
   @ViewChildren(BrowserPaneComponent)
   private panes: QueryList<BrowserPaneComponent>;
-  private tab: IBrowserTab;
 
-  constructor(private router: Router, private manager: BrowserPaneManagerService, private userService: UserDataService) {
-    this.tabId = 'random';
-    this.tab = this.userService.getTabById(this.tabId);
+  constructor(private router: Router, private manager: BrowserManagerService, private userService: UserDataService) {
   }
 
-  ngOnInit(): void {
-  }
+  ngOnInit(): void { }
   ngAfterViewChecked(): void {
-    if (this.manager.getFocusedPane() === undefined) {
-      this.manager.setFocusedPane(this.panes.first);
-      this.manager.setPanes(this.panes.toArray());
+    if (this.manager.getFocusedInstance() === undefined) {
+      this.manager.setFocusedInstance(this.panes.first.id);
     }
   }
 
   public newInstance() {
-    if (this.getTabData()) {
-      this.userService.addInstanceToTab(this.tabId, 'https://www.google.com');
-    }
+    this.userService.addInstanceToTab(this.tabId, 'https://www.google.com');
   }
-  public getTabData(): IBrowserTab {
-    return this.tab;
+  public getInstances(): IBrowserInstance[] {
+    return this.userService.getTabById(this.tabId).instances;
+  }
+  public getInstanceById(instanceId: string): BrowserPaneComponent {
+    for (const pane of this.panes.toArray()) {
+      if (pane.id === instanceId) {
+        return pane;
+      }
+    }
+    return undefined;
   }
 }

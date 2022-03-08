@@ -4,11 +4,12 @@ import { Routes, RouterModule } from '@angular/router';
 import { PageNotFoundComponent } from './shared/components';
 
 import { DetailRoutingModule } from './detail/detail-routing.module';
+import { BrowserComponent } from './components/browser/browser.component';
 
 const routes: Routes = [
   {
     path: '',
-    component: BrowserPaneContainerComponent
+    component: BrowserComponent
   },
   {
     path: '**',

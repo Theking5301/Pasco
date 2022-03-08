@@ -1,4 +1,4 @@
-import { BrowserPaneManagerService } from './../../services/browser-pane-manager/browser-pane-manager.service';
+import { BrowserManagerService } from '../../services/browser-manager/browser-manager.service';
 import { Component, Input, OnInit } from '@angular/core';
 
 @Component({
@@ -9,21 +9,19 @@ import { Component, Input, OnInit } from '@angular/core';
 export class NavigationBarComponent implements OnInit {
   public url: string;
 
-  constructor(private paneManager: BrowserPaneManagerService) {
-    if (this.paneManager.getFocusedPane() !== undefined) {
-      this.url = this.paneManager.getFocusedPane().getUrl();
-    }
+  constructor(private paneManager: BrowserManagerService) {
     this.paneManager.focusedPaneChanged.subscribe((pane) => {
-      this.url = this.paneManager.getFocusedPane().getUrl();
+      console.log("emit");
+      this.url = this.paneManager.getFocusedInstance().url;
     });
   }
 
   ngOnInit(): void {
   }
   public urlSubmitted(e) {
-    if (this.paneManager.getFocusedPane() !== undefined) {
+    if (this.paneManager.getFocusedInstance() !== undefined) {
       this.url = this.formatUrl(this.url);
-      this.paneManager.navigateFocusedPane(this.url);
+      this.paneManager.navigateFocusedInstance(this.url);
     }
   }
   public formatUrl(url: string): string {
@@ -44,6 +42,6 @@ export class NavigationBarComponent implements OnInit {
     this.paneManager.performRefresh();
   }
   public closeInstance() {
-    this.paneManager.removeFocusedPane();
+    this.paneManager.removeFocusedInstance();
   }
 }

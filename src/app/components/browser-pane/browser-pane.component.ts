@@ -1,6 +1,5 @@
 import { Component, Input, ViewChild, OnInit, AfterViewInit, EventEmitter, Output } from '@angular/core';
-import { Menu, MenuItem, webFrame } from 'electron';
-import { BrowserPaneManagerService } from '../../services/browser-pane-manager/browser-pane-manager.service';
+import { BrowserManagerService } from '../../services/browser-manager/browser-manager.service';
 import { PascoElectronService } from '../../services/pasco-electron/pasco-electron.service';
 
 @Component({
@@ -11,8 +10,6 @@ import { PascoElectronService } from '../../services/pasco-electron/pasco-electr
 export class BrowserPaneComponent implements OnInit, AfterViewInit {
   @Input()
   public id: string;
-  @Input()
-  public url: string;
   @Output()
   public navigated: EventEmitter<BrowserPaneComponent>;
 
@@ -23,25 +20,17 @@ export class BrowserPaneComponent implements OnInit, AfterViewInit {
   private firstTimeLoaded: boolean;
 
 
-  constructor(private electron: PascoElectronService, private paneManager: BrowserPaneManagerService) {
-    this.url = 'https://www.google.com';
+  constructor(private electron: PascoElectronService, private paneManager: BrowserManagerService) {
     this.domLoaded = false;
     this.navigated = new EventEmitter();
   }
 
-  ngOnInit(): void {
+  ngOnInit(): void { }
 
-  }
   ngAfterViewInit(): void {
     this.webviewNative = this.webview.nativeElement;
     this.webviewNative.addEventListener('dom-ready', (e) => {
-      // If this is the SECOND or more navigate, then we raise the event.
-      if (this.firstTimeLoaded) {
-        this.navigated.emit(this);
-      }
-
       // Capture the loaded state.
-      this.domLoaded = true;
       this.firstTimeLoaded = true;
       this.webviewNative.executeJavaScript('console.log("test")');
 
@@ -63,29 +52,29 @@ export class BrowserPaneComponent implements OnInit, AfterViewInit {
         }
         `);
     });
+
+    this.webviewNative.addEventListener('did-navigate', (e) => {
+      this.domLoaded = true;
+      this.navigated.emit(this);
+    });
   }
   public navigate(url: string): void {
     if (this.domLoaded) {
       this.domLoaded = false;
-      this.url = url;
       return this.webviewNative.loadURL(url);
     }
   }
-  public getUrl(): string {
-    if (this.domLoaded) {
-      return this.webviewNative.getURL();
-    } else {
-      return this.url;
-    }
+  public getUrl() : string {
+    return this.paneManager.getSelectedTab().;
   }
   public mouseUp(e) {
     console.log(e);
   }
   public clicked() {
-    this.paneManager.setFocusedPane(this);
+    this.paneManager.setFocusedInstance(this.id);
   }
   public focused() {
-    return this.paneManager.getFocusedPane() === this;
+    return this.paneManager.getFocusedInstance().id === this.id;
   }
   public performBack() {
     if (this.domLoaded) {
@@ -101,5 +90,8 @@ export class BrowserPaneComponent implements OnInit, AfterViewInit {
     if (this.domLoaded) {
       this.webviewNative.reload();
     }
+  }
+  public hasLoadedFirstTime() {
+    return this.firstTimeLoaded;
   }
 }

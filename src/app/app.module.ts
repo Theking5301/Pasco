@@ -19,6 +19,7 @@ import { NavigationBarComponent } from './components/navigation-bar/navigation-b
 import { TabBarComponent } from './components/tab-bar/tab-bar.component';
 import { TabComponent } from './components/tab/tab.component';
 import { UserDataService } from './services/user-data-service/user-data-service.service';
+import { BrowserComponent } from './components/browser/browser.component';
 
 // AoT requires an exported function for factories
 const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader => new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -28,7 +29,7 @@ export function initializeApplication(userData: UserDataService): () => Promise<
 }
 
 @NgModule({
-  declarations: [AppComponent, TitlebarComponent, BrowserPaneContainerComponent, BrowserPaneComponent, NavigationBarComponent, TabBarComponent, TabComponent],
+  declarations: [AppComponent, TitlebarComponent, BrowserPaneContainerComponent, BrowserPaneComponent, NavigationBarComponent, TabBarComponent, TabComponent, BrowserComponent],
   imports: [
     BrowserModule,
     FormsModule,

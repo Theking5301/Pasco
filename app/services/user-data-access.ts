@@ -1,5 +1,6 @@
 import { app, ipcMain } from 'electron';
 import * as fs from 'fs';
+import { IUserData } from '../models/UserData';
 
 export class UserDataAccess {
   private cachedData: IUserData;
@@ -19,17 +20,4 @@ export class UserDataAccess {
       event.sender.send('pasco/user-data', this.cachedData);
     });
   }
-}
-export interface IUserData {
-  version: number;
-  tabs: IBrowserTab[];
-}
-export interface IBrowserTab {
-  id: string;
-  name: string;
-  instances: IBrowserInstance[];
-}
-export interface IBrowserInstance {
-  id: string;
-  url: string;
 }
