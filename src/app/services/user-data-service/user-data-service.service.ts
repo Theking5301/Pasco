@@ -1,7 +1,7 @@
-import { IBrowserTab, IUserData } from '../../../../app/services/user-data-access';
 import { Injectable } from '@angular/core';
 import { IpcResponse, PascoElectronService } from '../pasco-electron/pasco-electron.service';
-import { Observable } from 'rxjs';
+import { v4 as uuidv4 } from 'uuid';
+import { IBrowserTab, IUserData } from '../../../../app/models/UserData';
 
 @Injectable({
   providedIn: 'root'
@@ -35,10 +35,10 @@ export class UserDataService {
   public addTab(name: string) {
     this.userData.tabs.push({
       name,
-      id: 'random',
+      id: uuidv4(),
       instances: [
         {
-          id: 'random1',
+          id: uuidv4(),
           url: 'https://www.google.com'
         }
       ]
@@ -66,7 +66,7 @@ export class UserDataService {
     const tab = this.getTabById(tabId);
     if (tab) {
       tab.instances.push({
-        id: 'random',
+        id: uuidv4(),
         url
       });
       this.syncToDataAccess();
@@ -103,7 +103,6 @@ export class UserDataService {
         if (!this.userData) {
           this.userData = this.createDefaultUserData();
         }
-        console.log(this.userData);
         resolve(undefined);
       });
     });
@@ -117,10 +116,10 @@ export class UserDataService {
       tabs: [
         {
           name: 'DefaultTab',
-          id: 'random',
+          id: uuidv4(),
           instances: [
             {
-              id: 'random',
+              id: uuidv4(),
               url: 'https://www.google.com'
             }
           ]
