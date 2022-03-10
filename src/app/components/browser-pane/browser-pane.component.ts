@@ -5,7 +5,7 @@ import { UserDataService } from './../../services/user-data-service/user-data-se
 
 
 @Component({
-  selector: 'pasco-browser-pane',
+  selector: 'app-browser-pane',
   templateUrl: './browser-pane.component.html',
   styleUrls: ['./browser-pane.component.scss']
 })

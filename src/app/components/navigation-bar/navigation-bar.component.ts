@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { BrowserManagerService } from '../../services/browser-manager/browser-manager.service';
 
 @Component({
-  selector: 'pasco-navigation-bar',
+  selector: 'app-navigation-bar',
   templateUrl: './navigation-bar.component.html',
   styleUrls: ['./navigation-bar.component.scss']
 })

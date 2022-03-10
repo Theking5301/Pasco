@@ -4,7 +4,7 @@ import { BrowserManagerService } from '../../services/browser-manager/browser-ma
 import { UserDataService } from '../../services/user-data-service/user-data-service.service';
 
 @Component({
-  selector: 'pasco-browser',
+  selector: 'app-browser',
   templateUrl: './browser.component.html',
   styleUrls: ['./browser.component.scss']
 })

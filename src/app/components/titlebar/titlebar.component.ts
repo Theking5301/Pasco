@@ -3,7 +3,7 @@ import { PascoElectronService } from '../../services/pasco-electron/pasco-electr
 import { StaticDataService } from '../../services/static-data-service/static-data-service.service';
 
 @Component({
-  selector: 'pasco-titlebar',
+  selector: 'app-titlebar',
   templateUrl: './titlebar.component.html',
   styleUrls: ['./titlebar.component.scss']
 })

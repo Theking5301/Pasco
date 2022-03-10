@@ -1,12 +1,12 @@
-import { Component, OnInit } from "@angular/core";
-import { BrowserTab } from "../../../../app/models/UserData";
-import { BrowserManagerService } from "../../services/browser-manager/browser-manager.service";
-import { UserDataService } from "../../services/user-data-service/user-data-service.service";
+import { Component, OnInit } from '@angular/core';
+import { BrowserTab } from '../../../../app/models/UserData';
+import { BrowserManagerService } from '../../services/browser-manager/browser-manager.service';
+import { UserDataService } from '../../services/user-data-service/user-data-service.service';
 
 @Component({
-  selector: "pasco-tab-bar",
-  templateUrl: "./tab-bar.component.html",
-  styleUrls: ["./tab-bar.component.scss", "../tab/tab.component.scss"],
+  selector: 'app-tab-bar',
+  templateUrl: './tab-bar.component.html',
+  styleUrls: ['./tab-bar.component.scss', '../tab/tab.component.scss'],
 })
 export class TabBarComponent implements OnInit {
   public selectedTabId: string;
@@ -29,6 +29,6 @@ export class TabBarComponent implements OnInit {
   }
 
   public newTabClicked() {
-    this.manager.addTab("test");
+    this.manager.addTab('test');
   }
 }

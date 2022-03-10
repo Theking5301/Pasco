@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { BrowserManagerService } from '../../services/browser-manager/browser-manager.service';
 
 @Component({
-  selector: 'pasco-tab',
+  selector: 'app-tab',
   templateUrl: './tab.component.html',
   styleUrls: ['./tab.component.scss']
 })

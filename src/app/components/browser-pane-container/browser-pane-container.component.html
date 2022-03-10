@@ -1,9 +1,9 @@
 <div class="browser-container">
   <div *ngIf="getInstances()" class="browser-view-container">
     <div *ngFor="let instance of getInstances()" class="browser-view-container">
-      <pasco-browser-pane class="pane" [id]="instance.getId()" [tabId]="tabId">
-      </pasco-browser-pane>
-      <div class="resize-bar"></div>
+      <app-browser-pane class="pane" [id]="instance.getId()" [tabId]="tabId">
+        </pasco-browser-pane>
+        <div class="resize-bar"></div>
     </div>
   </div>
 
