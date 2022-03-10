@@ -8,8 +8,14 @@
 [![Watch on GitHub][github-watch-badge]][github-watch]
 [![Star on GitHub][github-star-badge]][github-star]
 
+# Overview
+Pasco is a web browser designed explicitly to promote productivity and efficient use of screen real estate. Open multiple pages within a single tab and organize tabs with specific websites. One tab for shopping, one tab for finances. All tabs will **eventually** be synced to the cloud and accessible on any MacOS, Windows, or Linux machine.
 
+# Local Development
+Pull this repository and install all dependencies with
+```npm install```.
 
+Then you may utilitize the included VSCode debug configurations to launch locally.
 
 [maintained-badge]: https://img.shields.io/badge/maintained-yes-brightgreen
 [prs-badge]: https://img.shields.io/badge/PRs-welcome-red.svg
