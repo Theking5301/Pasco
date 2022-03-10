@@ -1,0 +1,19 @@
+<div class="pane-container">
+  <div class="browser-overlay-top">
+    <div class="selection-indicator" [ngClass]="{'selection-indicator-visible': displayFocusedIndicator()}"></div>
+    <div class="overlay-top-buttons" (mouseenter)="overlayTopMouseEnter()" (mouseleave)="overlayTopMouseLeave()">
+      <button class="top-overlay-button close-button"
+        [ngClass]="{'top-overlay-button-visible': displayCloseInstanceButton()}" (click)="closeInstance()">
+        <img class="top-overlay-icon" src="assets/icons/close-tab.svg" alt="Close Instance" />
+      </button>
+      <div class="button-spacer"></div>
+      <button class="top-overlay-button new-instance-button"
+        [ngClass]="{'top-overlay-button-visible':  displayNewInstanceButton()}" (click)="newInstance()">
+        <img class="top-overlay-icon new-instance-icon" src="assets/icons/close-tab.svg" alt="New Instance" />
+      </button>
+    </div>
+  </div>
+  <webview #webview class="web-view" [ngClass]="{'web-view-loaded': hasLoadedFirstTime()}" attr.src="{{ url }}"
+    preload="{{preload}}">
+  </webview>
+</div>

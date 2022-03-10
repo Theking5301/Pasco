@@ -1,0 +1,52 @@
+.titlebar {
+  display    : block;
+  width      : 100%;
+  height     : 120px;
+  background : transparent;
+  overflow   : hidden;
+  user-select: none;
+}
+
+.window_control_row {
+  display        : flex;
+  align-items    : flex-start;
+  width          : 100%;
+  height         : 100%;
+  justify-content: flex-end;
+}
+
+.window_spacer {
+  flex-grow: 1;
+}
+
+.window_control_button_wrapper {
+  display: flex;
+}
+
+.window_control_button {
+  border-style    : solid;
+  border          : none;
+  background-color: rgba(0, 0, 0, 0);
+  filter          : brightness(0.4);
+  transition      : 50ms all;
+  margin-top      : 10px;
+  margin-right    : 5px;
+  user-select     : none;
+}
+
+.window_control_button:hover {
+  filter: brightness(1);
+}
+
+.window_control_button:focus {
+  outline: none;
+}
+
+.window_control_button_close:hover {
+  filter: brightness(1);
+}
+
+.window_control_icon {
+  width : 16px;
+  height: 16px;
+}

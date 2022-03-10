@@ -1,0 +1,60 @@
+.url_bar_container {
+  display         : flex;
+  align-items     : center;
+  z-index         : 100;
+  background-color: rgba(255, 255, 255, 1.0);
+  padding         : 8px;
+}
+
+.left-button-container {
+  display        : flex;
+  width          : 100px;
+  align-items    : stretch;
+  justify-content: space-evenly;
+}
+
+.url_bar {
+  border-radius   : 19px;
+  width           : 100%;
+  background-color: rgb(240, 240, 240);
+  border-color    : rgb(235, 235, 235);
+  border-style    : solid;
+  font-size       : 14px;
+  padding         : 6px;
+  padding-left    : 10px;
+  color           : rgb(25, 25, 25);
+  font-size       : 14px;
+}
+
+.url_bar:focus {
+  outline: none;
+}
+
+.url_bar_button {
+  padding         : 0%;
+  border          : none;
+  background-color: transparent;
+  cursor          : pointer;
+}
+
+.url_bar_icon {
+  width     : 24px;
+  height    : 24px;
+  transition: 100ms all ease-in-out;
+}
+
+.url_bar_icon:hover {
+  fill: red;
+}
+
+.url_bar_icon:active {
+  transform: translateY(1px);
+}
+
+.forward-icon {
+  transform: rotate(180deg);
+}
+
+.forward-icon:active {
+  transform: translateY(1px) rotate(180deg);
+}

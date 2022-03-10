@@ -1,0 +1,26 @@
+.browser-container {
+  display       : flex;
+  width         : 100%;
+  height        : 100%;
+  flex-direction: column;
+}
+
+.browser-view-container {
+  display                   : flex;
+  flex-grow                 : 1;
+  width                     : 100%;
+  height                    : 100%;
+  border-bottom-left-radius : 2px;
+  border-bottom-right-radius: 2px;
+  overflow                  : hidden;
+}
+
+.pane {
+  width: 100%;
+}
+
+.resize-bar {
+  width           : 2px;
+  background-color: transparent;
+  cursor          : ew-resize;
+}
