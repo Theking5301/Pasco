@@ -29,5 +29,3 @@
 [github-watch]: https://github.com/Theking5301/Pasco/watchers
 [github-star-badge]: https://img.shields.io/github/stars/Theking5301/Pasco.svg?style=social
 [github-star]: https://github.com/Theking5301/Pasco/stargazers
-[twitter]: https://twitter.com/intent/tweet?text=Check%20out%20Pasco!%20https://github.com/Theking5301/Pasco%20%F0%9F%91%8D
-[twitter-badge]: https://img.shields.io/twitter/url/https/github.com/Theking5301/Pasco.svg?style=social
