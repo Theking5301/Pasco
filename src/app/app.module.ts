@@ -34,7 +34,16 @@ export function initializeApplication(userData: UserDataService, staticData: Sta
 }
 
 @NgModule({
-  declarations: [AppComponent, TitlebarComponent, BrowserPaneContainerComponent, BrowserPaneComponent, NavigationBarComponent, TabBarComponent, TabComponent, BrowserComponent],
+  declarations: [
+    AppComponent,
+    TitlebarComponent,
+    BrowserPaneContainerComponent,
+    BrowserPaneComponent,
+    NavigationBarComponent,
+    TabBarComponent,
+    TabComponent,
+    BrowserComponent
+  ],
   imports: [
     BrowserModule,
     FormsModule,
