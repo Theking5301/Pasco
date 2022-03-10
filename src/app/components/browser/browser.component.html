@@ -1,13 +1,13 @@
 <div class="browser">
   <div class="tab-bar">
     <app-tab-bar>
-      </pasco-tab-bar>
+    </app-tab-bar>
   </div>
   <div class="nav-bar">
     <app-navigation-bar>
-      </pasco-navigation-bar>
+    </app-navigation-bar>
   </div>
   <app-browser-pane-container *ngFor="let tab of getTabs()" class="visible-container"
     [ngClass]="{'collapsed-container': !isVisible(tab.getId())}" [tabId]="tab.getId()">
-    </pasco-browser-pane-container>
+  </app-browser-pane-container>
 </div>
