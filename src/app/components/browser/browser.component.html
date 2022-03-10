@@ -1,5 +1,11 @@
 <div class="browser">
+  <div class="tab-bar">
+    <pasco-tab-bar></pasco-tab-bar>
+  </div>
+  <div class="nav-bar">
+    <pasco-navigation-bar></pasco-navigation-bar>
+  </div>
   <pasco-browser-pane-container *ngFor="let tab of getTabs()" class="visible-container"
-    [ngClass]="{'collapsed-container': !isVisible(tab.id)}" [tabId]="tab.id">
+    [ngClass]="{'collapsed-container': !isVisible(tab.getId())}" [tabId]="tab.getId()">
   </pasco-browser-pane-container>
 </div>

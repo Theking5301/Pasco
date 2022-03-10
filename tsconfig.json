@@ -28,7 +28,7 @@
     "fullTemplateTypeCheck": true,
     "annotateForClosureCompiler": true,
     "strictInjectionParameters": true,
-    "skipTemplateCodegen": false,
+    "skipTemplateCodegen": true,
     "preserveWhitespaces": true,
     "skipMetadataEmit": false,
     "disableTypeScriptVersionCheck": true

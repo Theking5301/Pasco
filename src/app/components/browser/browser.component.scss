@@ -10,3 +10,17 @@
 .collapsed-container {
   display: none;
 }
+
+.tab-bar {
+  position  : fixed;
+  top       : 39px;
+  box-shadow: 0px 5px 7px -3px rgba(0, 0, 0, 0.1);
+}
+
+.nav-bar {
+  position     : fixed;
+  top          : 73px;
+  width        : calc(100% - 2.5px);
+  border-bottom: solid 1px rgb(200, 200, 200);
+  box-shadow   : 0px 5px 7px -3px rgba(0, 0, 0, 0.1);
+}

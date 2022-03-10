@@ -34,6 +34,7 @@
   padding         : 0%;
   border          : none;
   background-color: transparent;
+  cursor          : pointer;
 }
 
 .url_bar_icon {
@@ -56,24 +57,4 @@
 
 .forward-icon:active {
   transform: translateY(1px) rotate(180deg);
-}
-
-.close-button {
-  border          : none;
-  background-color: transparent;
-}
-
-.close-icon {
-  width     : 20px;
-  height    : 20px;
-  opacity   : 0.5;
-  position  : relative;
-  top       : 2px;
-  right     : -5px;
-  cursor    : pointer;
-  transition: 100ms all;
-}
-
-.close-icon:hover {
-  opacity: 0.75;
 }

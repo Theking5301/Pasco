@@ -1,4 +1,4 @@
-<div class='tab tab-on' [ngClass]="{'tab-active': active}" (click)="tabClicked($event)"
+<div class='tab tab-on' [ngClass]="{'tab-active': active}" (mousedown)="mouseDown($event)" (click)="tabClicked($event)"
   (auxclick)="tabAuxClicked($event)">
   <img class='tab-icon' />
   <span class='tab-title'>{{name}}</span>

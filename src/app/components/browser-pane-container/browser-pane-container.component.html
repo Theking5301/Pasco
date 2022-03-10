@@ -1,15 +1,13 @@
 <div class="browser-container">
   <div *ngIf="getInstances()" class="browser-view-container">
     <div *ngFor="let instance of getInstances()" class="browser-view-container">
-      <pasco-browser-pane class="pane" [id]="instance.id">
+      <pasco-browser-pane class="pane" [id]="instance.getId()" [tabId]="tabId">
       </pasco-browser-pane>
       <div class="resize-bar"></div>
     </div>
   </div>
 
   <div class="footer">
-    <button class="add-instance-button" (click)="newInstance()">
-      <img class="add-instance-icon" src="assets/icons/new-tab.svg" alt="New Instance" />
-    </button>
+
   </div>
 </div>

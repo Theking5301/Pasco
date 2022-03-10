@@ -1,5 +1,5 @@
 <div class="tab-bar-container">
-  <pasco-tab *ngFor="let tab of tabs" [active]="isSelectedTab(tab.id)" [tabId]="tab.id" [name]="tab.name"
+  <pasco-tab *ngFor="let tab of tabs" [active]="isSelectedTab(tab.getId())" [tabId]="tab.getId()" [name]="tab.getName()"
     (tabselected)="tabSelected($event)">
   </pasco-tab>
   <button class='new-tab-button' (click)="newTabClicked()">

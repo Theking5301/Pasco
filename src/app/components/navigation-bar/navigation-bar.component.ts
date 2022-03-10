@@ -1,5 +1,5 @@
+import { Component, OnInit } from '@angular/core';
 import { BrowserManagerService } from '../../services/browser-manager/browser-manager.service';
-import { Component, Input, OnInit } from '@angular/core';
 
 @Component({
   selector: 'pasco-navigation-bar',
@@ -8,20 +8,25 @@ import { Component, Input, OnInit } from '@angular/core';
 })
 export class NavigationBarComponent implements OnInit {
   public url: string;
-
-  constructor(private paneManager: BrowserManagerService) {
-    this.paneManager.focusedPaneChanged.subscribe((pane) => {
-      console.log("emit");
-      this.url = this.paneManager.getFocusedInstance().url;
+  constructor(private manager: BrowserManagerService) {
+    this.url = this.manager.getCurrentTabFocusedInstance().getUrl();
+    this.manager.focusedPaneChanged.subscribe((pane) => {
+      this.url = this.manager.getCurrentTabFocusedInstance().getUrl();
+    });
+    this.manager.anyInstanceNavigated.subscribe((e) => {
+      this.url = e.url;
     });
   }
 
   ngOnInit(): void {
   }
+  public getUrl() {
+    return this.manager.getCurrentTabFocusedInstance().getUrl();
+  }
   public urlSubmitted(e) {
-    if (this.paneManager.getFocusedInstance() !== undefined) {
+    if (this.manager.getCurrentTabFocusedInstance() !== undefined) {
       this.url = this.formatUrl(this.url);
-      this.paneManager.navigateFocusedInstance(this.url);
+      this.manager.navigateFocusedInstance(this.url);
     }
   }
   public formatUrl(url: string): string {
@@ -33,15 +38,15 @@ export class NavigationBarComponent implements OnInit {
     return url;
   }
   public forward() {
-    this.paneManager.performForward();
+    this.manager.performForward();
   }
   public back() {
-    this.paneManager.performBack();
+    this.manager.performBack();
   }
   public refresh() {
-    this.paneManager.performRefresh();
+    this.manager.performRefresh();
   }
-  public closeInstance() {
-    this.paneManager.removeFocusedInstance();
+  public openMenu() {
+
   }
 }

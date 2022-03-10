@@ -10,11 +10,8 @@
       <img class="url_bar_icon" src="assets/icons/refresh.svg" alt="Refresh" />
     </button>
   </div>
-  <input type="text" class="url_bar" value="{{ this.url }}" [(ngModel)]="url" (keyup.enter)="urlSubmitted($event)" />
-
-
-  <button class="close-button" (click)="closeInstance()">
-    <img class="close-icon" src="assets/icons/close-tab.svg" alt="Close Instance" />
+  <input type="text" class="url_bar" [(ngModel)]="url" (keyup.enter)="urlSubmitted($event)" />
+  <button class="url_bar_button" (click)="openMenu()">
+    <img class="url_bar_icon" src="assets/icons/menu.svg" alt="Menu" />
   </button>
-
 </div>

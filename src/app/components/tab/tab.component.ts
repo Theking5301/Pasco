@@ -1,5 +1,5 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { UserDataService } from '../../services/user-data-service/user-data-service.service';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { BrowserManagerService } from '../../services/browser-manager/browser-manager.service';
 
 @Component({
   selector: 'pasco-tab',
@@ -16,7 +16,7 @@ export class TabComponent implements OnInit {
   @Output()
   public tabselected: EventEmitter<string>;
 
-  constructor(private userDataService: UserDataService) {
+  constructor(private manager: BrowserManagerService) {
     this.tabselected = new EventEmitter();
   }
 
@@ -30,7 +30,12 @@ export class TabComponent implements OnInit {
       this.closeTab();
     }
   }
+  public mouseDown(e) {
+    if (e.button === 1) {
+      e.preventDefault();
+    }
+  }
   public closeTab(): void {
-    this.userDataService.removeTab(this.tabId);
+    this.manager.removeTab(this.tabId);
   }
 }

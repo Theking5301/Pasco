@@ -1,6 +1,8 @@
-import { Component, Input, ViewChild, OnInit, AfterViewInit, EventEmitter, Output } from '@angular/core';
+import { AfterViewInit, Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { BrowserManagerService } from '../../services/browser-manager/browser-manager.service';
 import { PascoElectronService } from '../../services/pasco-electron/pasco-electron.service';
+import { UserDataService } from './../../services/user-data-service/user-data-service.service';
+
 
 @Component({
   selector: 'pasco-browser-pane',
@@ -10,29 +12,76 @@ import { PascoElectronService } from '../../services/pasco-electron/pasco-electr
 export class BrowserPaneComponent implements OnInit, AfterViewInit {
   @Input()
   public id: string;
+  @Input()
+  public tabId: string;
   @Output()
-  public navigated: EventEmitter<BrowserPaneComponent>;
-
+  public navigated: EventEmitter<IPaneNavigatedEvent>;
   @ViewChild('webview')
   private webview: any;
+
+  public topOverlayHovered: boolean;
+  public url: string;
+  public preload: string;
   private webviewNative: any;
   private domLoaded: boolean;
   private firstTimeLoaded: boolean;
+  private topButtonFadeOffTimeout: NodeJS.Timeout;
 
 
-  constructor(private electron: PascoElectronService, private paneManager: BrowserManagerService) {
+  constructor(private electron: PascoElectronService, private userService: UserDataService, private manager: BrowserManagerService) {
     this.domLoaded = false;
     this.navigated = new EventEmitter();
+    this.manager.registerInstance(this, (e) => {
+      if (e.instanceId === this.id && e.tabId === this.tabId) {
+        this.navigate(e.url);
+      }
+    }, (e) => {
+      if (e.instanceId === this.id && e.tabId === this.tabId) {
+        if (e.event === 'back') {
+          this.webviewNative.goBack();
+        } else if (e.event === 'forward') {
+          this.webviewNative.goForward();
+        } else if (e.event === 'refresh') {
+          this.webviewNative.reload();
+        }
+      }
+    });
+
+    const querystring = require('querystring');
+    const query = querystring.parse(global.location.search);
+    const sanitizedQuery = query['?dirname'].replaceAll('\\', '/');
+    this.preload = 'file://' + sanitizedQuery + '/preload.js';
+    console.log(this.preload);
   }
 
-  ngOnInit(): void { }
-
+  ngOnInit(): void {
+    this.url = this.userService.getUserData().getTab(this.tabId).getInstance(this.id).getUrl();
+  }
   ngAfterViewInit(): void {
     this.webviewNative = this.webview.nativeElement;
+
     this.webviewNative.addEventListener('dom-ready', (e) => {
-      // Capture the loaded state.
+      // Listen for clicks.
+      if (!this.firstTimeLoaded) {
+        this.webviewNative.addEventListener('ipc-message', (message) => {
+          if (message.channel === 'mousedown') {
+            this.webContentsMouseDown(message.args[0]);
+          } else if (message.channel === 'click') {
+            this.webContentsClicked(message.args[0]);
+          } else if (message.channel === 'auxclick') {
+            this.webContentsAuxClicked(message.args[0]);
+          }
+        });
+
+        // When loading for the first time, display the buttons so the user knows that they're there.
+        this.topOverlayHovered = true;
+        this.topButtonFadeOffTimeout = setTimeout(() => {
+          this.topOverlayHovered = false;
+        }, 2000);
+      }
+
+      // Capture the first time loaded state.
       this.firstTimeLoaded = true;
-      this.webviewNative.executeJavaScript('console.log("test")');
 
       // Modify the scrollbars.
       this.webviewNative.insertCSS(`
@@ -55,7 +104,11 @@ export class BrowserPaneComponent implements OnInit, AfterViewInit {
 
     this.webviewNative.addEventListener('did-navigate', (e) => {
       this.domLoaded = true;
-      this.navigated.emit(this);
+      this.navigated.emit({
+        instanceId: this.id,
+        tabId: this.tabId,
+        url: e.url
+      });
     });
   }
   public navigate(url: string): void {
@@ -64,17 +117,12 @@ export class BrowserPaneComponent implements OnInit, AfterViewInit {
       return this.webviewNative.loadURL(url);
     }
   }
-  public getUrl() : string {
-    return this.paneManager.getSelectedTab().;
-  }
+
   public mouseUp(e) {
     console.log(e);
   }
-  public clicked() {
-    this.paneManager.setFocusedInstance(this.id);
-  }
   public focused() {
-    return this.paneManager.getFocusedInstance().id === this.id;
+    return this.manager.getCurrentTabFocusedInstance().getId() === this.id;
   }
   public performBack() {
     if (this.domLoaded) {
@@ -94,4 +142,50 @@ export class BrowserPaneComponent implements OnInit, AfterViewInit {
   public hasLoadedFirstTime() {
     return this.firstTimeLoaded;
   }
+  public displayFocusedIndicator() {
+    return this.focused() && this.manager.getSelectedTab().getInstances().length > 1;
+  }
+  public closeInstance() {
+    this.manager.removeInstanceFromTab(this.tabId, this.id);
+  }
+  public newInstance() {
+    this.manager.addInstanceToTabAfterInstance(this.tabId, this.id, 'https://www.google.com');
+  }
+  public overlayTopMouseEnter() {
+    this.topOverlayHovered = true;
+    clearTimeout(this.topButtonFadeOffTimeout);
+    this.topButtonFadeOffTimeout = setTimeout(() => {
+      this.topOverlayHovered = false;
+    }, 2000);
+  }
+  public overlayTopMouseLeave() {
+    this.topOverlayHovered = false;
+  }
+
+  public displayCloseInstanceButton() {
+    return this.topOverlayHovered && this.manager.getSelectedTab().getInstances().length > 1;
+  }
+  public displayNewInstanceButton() {
+    return this.topOverlayHovered;
+  }
+
+  private webContentsMouseDown(e) {
+    this.manager.setCurrentTabFocusedInstance(this.id);
+
+  }
+  private webContentsClicked(e) {
+
+  }
+  private webContentsAuxClicked(e) {
+    if (e.button === 3) {
+      this.webviewNative.goBack();
+    } else if (e.button === 4) {
+      this.webviewNative.goForward();
+    }
+  }
+}
+export interface IPaneNavigatedEvent {
+  instanceId: string;
+  tabId: string;
+  url: string;
 }

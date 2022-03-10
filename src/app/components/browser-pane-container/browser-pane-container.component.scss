@@ -24,28 +24,3 @@
   background-color: transparent;
   cursor          : ew-resize;
 }
-
-.footer {
-  display       : flex;
-  height        : 25px;
-  flex-direction: row-reverse;
-  align-items   : center;
-  align-content : center;
-}
-
-.add-instance-button {
-  margin-top      : 2.5px;
-  background-color: transparent;
-  border          : none;
-}
-
-.add-instance-icon {
-  width     : 18px;
-  height    : 18px;
-  transition: 100ms all ease-in-out;
-  cursor    : pointer;
-}
-
-.add-instance-icon:active {
-  transform: translateY(1px);
-}

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { AppComponent } from '../../app.component';
 import { PascoElectronService } from '../../services/pasco-electron/pasco-electron.service';
+import { StaticDataService } from '../../services/static-data-service/static-data-service.service';
 
 @Component({
   selector: 'pasco-titlebar',
@@ -8,17 +8,17 @@ import { PascoElectronService } from '../../services/pasco-electron/pasco-electr
   styleUrls: ['./titlebar.component.scss']
 })
 export class TitlebarComponent implements OnInit {
+  public showWindowControls: boolean;
   private animationId;
   private mouseX;
   private mouseY;
   private currentMouseButtonDown;
   private framesMoved;
-  public showWindowControls: boolean;
 
 
-  constructor(private electron: PascoElectronService, private app: AppComponent) {
+  constructor(private electron: PascoElectronService, private staticData: StaticDataService) {
     this.framesMoved = 0;
-    this.showWindowControls = app.getPlatform() !== 'darwin';
+    this.showWindowControls = staticData.getStaticData().platform !== 'darwin';
   }
 
   ngOnInit(): void {

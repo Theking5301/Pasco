@@ -1,5 +1,5 @@
-import { Component, Input, OnInit } from "@angular/core";
-import { IBrowserTab } from "../../../../app/services/user-data-access";
+import { Component, OnInit } from "@angular/core";
+import { BrowserTab } from "../../../../app/models/UserData";
 import { BrowserManagerService } from "../../services/browser-manager/browser-manager.service";
 import { UserDataService } from "../../services/user-data-service/user-data-service.service";
 
@@ -10,25 +10,25 @@ import { UserDataService } from "../../services/user-data-service/user-data-serv
 })
 export class TabBarComponent implements OnInit {
   public selectedTabId: string;
-  public tabs: IBrowserTab[];
+  public tabs: BrowserTab[];
 
-  constructor(
-    private userService: UserDataService,
-    private manager: BrowserManagerService
-  ) {
-    this.tabs = this.userService.getTabs();
-    this.selectedTabId = this.userService.getTabs()[0].id;
+  constructor(private userService: UserDataService, private manager: BrowserManagerService) {
+    this.tabs = this.userService.getUserData().getTabs();
+    this.selectedTabId = this.userService.getUserData().getTabs()[0].getId();
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void { }
+
   public tabSelected(tabId: string): void {
     this.selectedTabId = tabId;
-    this.manager.setSelectedTabId(tabId);
+    this.manager.setSelectedTab(tabId);
   }
+
   public isSelectedTab(tabId: string): boolean {
-    return this.selectedTabId === tabId;
+    return this.manager.getSelectedTab().getId() === tabId;
   }
+
   public newTabClicked() {
-    this.userService.addTab("test");
+    this.manager.addTab("test");
   }
 }

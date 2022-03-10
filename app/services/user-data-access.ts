@@ -1,14 +1,14 @@
 import { app, ipcMain } from 'electron';
 import * as fs from 'fs';
-import { IUserData } from '../models/UserData';
+import { UserData } from '../models/UserData';
 
 export class UserDataAccess {
-  private cachedData: IUserData;
+  private cachedData: UserData;
 
   public constructor() {
     if (fs.existsSync(app.getPath('userData').concat('\\user-data.json'))) {
       const data = fs.readFileSync(app.getPath('userData').concat('\\user-data.json'), 'utf8');
-      this.cachedData = JSON.parse(data);
+      this.cachedData = new UserData(JSON.parse(data));
     }
 
     ipcMain.on('pasco/user-data/update', (event, data) => {

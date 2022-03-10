@@ -1,16 +1,17 @@
-import { app, BrowserWindow, screen, ipcMain } from 'electron';
-import * as path from 'path';
-import * as fs from 'fs';
-import * as url from 'url';
 import * as electron from 'electron';
+import { app, BrowserWindow, ipcMain, screen } from 'electron';
+import * as contextMenu from 'electron-context-menu';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as url from 'url';
+import StaticDataAccess from './services/static-data-access';
 import { UserDataAccess } from './services/user-data-access';
 
 let win: BrowserWindow = null;
 const args = process.argv.slice(1),
   serve = args.some(val => val === '--serve');
 
-const services = [new UserDataAccess()];
-
+const services = [new UserDataAccess(), new StaticDataAccess()];
 
 function createWindow(): BrowserWindow {
 
@@ -39,7 +40,12 @@ function createWindow(): BrowserWindow {
     require('electron-reload')(__dirname, {
       electron: require(path.join(__dirname, '/../node_modules/electron'))
     });
-    win.loadURL('http://localhost:4200');
+    win.loadURL(url.format({
+      pathname: 'localhost:4200',
+      protocol: 'http:',
+      slashes: true,
+      query: { "dirname": __dirname }
+    }));
   } else {
     // Path when running electron executable
     let pathIndex = './index.html';
@@ -52,7 +58,8 @@ function createWindow(): BrowserWindow {
     win.loadURL(url.format({
       pathname: path.join(__dirname, pathIndex),
       protocol: 'file:',
-      slashes: true
+      slashes: true,
+      query: { "dirname": __dirname }
     }));
   }
 
@@ -135,6 +142,13 @@ try {
     // dock icon is clicked and there are no other windows open.
     if (win === null) {
       createWindow();
+    }
+  });
+
+  app.on("web-contents-created", (e, contents) => {
+    if (contents.getType() == "webview") {
+      // set context menu in webview
+      contextMenu({ window: contents, });
     }
   });
 

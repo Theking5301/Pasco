@@ -1,5 +1,5 @@
-import { IBrowserTab } from './../../../../app/services/user-data-access';
 import { Component, OnInit } from '@angular/core';
+import { BrowserTab } from '../../../../app/models/UserData';
 import { BrowserManagerService } from '../../services/browser-manager/browser-manager.service';
 import { UserDataService } from '../../services/user-data-service/user-data-service.service';
 
@@ -15,10 +15,10 @@ export class BrowserComponent implements OnInit {
 
   ngOnInit(): void {
   }
-  public getTabs(): IBrowserTab[] {
-    return this.userService.getTabs();
+  public getTabs(): BrowserTab[] {
+    return this.userService.getUserData().getTabs();
   }
   public isVisible(tabId: string) {
-    return this.manager.getSelectedTabId() === tabId;
+    return this.manager.getSelectedTab().getId() === tabId;
   }
 }
