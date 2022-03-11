@@ -81,6 +81,9 @@ export class BrowserTab {
   public getName(): string {
     return this.name;
   }
+  public setName(name: string) {
+    this.name = name;
+  }
 
   public getInstance(id: string): BrowserInstance {
     for (const instance of this.instances) {
@@ -125,6 +128,8 @@ export class BrowserTab {
 export class BrowserInstance {
   private id: string;
   private url: string;
+  private title: string;
+  private icon: string;
 
 
   public constructor(json?: any) {
@@ -141,5 +146,17 @@ export class BrowserInstance {
   }
   public setUrl(url: string) {
     this.url = url;
+  }
+  public getTitle(): string {
+    return this.title;
+  }
+  public setTitle(title: string) {
+    this.title = title;
+  }
+  public getIcon(): string {
+    return this.icon;
+  }
+  public setIcon(icon: string) {
+    this.icon = icon;
   }
 }

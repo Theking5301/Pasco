@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { BrowserManagerService } from '../../services/browser-manager/browser-manager.service';
+import { UserDataService } from '../../services/user-data-service/user-data-service.service';
 
 @Component({
   selector: 'app-tab',
@@ -11,12 +12,10 @@ export class TabComponent implements OnInit {
   public active: boolean;
   @Input()
   public tabId: string;
-  @Input()
-  public name: string;
   @Output()
   public tabselected: EventEmitter<string>;
 
-  constructor(private manager: BrowserManagerService) {
+  constructor(private userData: UserDataService, private manager: BrowserManagerService) {
     this.tabselected = new EventEmitter();
   }
 
@@ -37,5 +36,11 @@ export class TabComponent implements OnInit {
   }
   public closeTab(): void {
     this.manager.removeTab(this.tabId);
+  }
+  public getTabName(): string {
+    return this.userData.getUserData().getTab(this.tabId)?.getInstances()[0].getTitle();
+  }
+  public getTabIconUrl(): string {
+    return this.userData.getUserData().getTab(this.tabId)?.getInstances()[0].getIcon();
   }
 }

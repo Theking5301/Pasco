@@ -110,6 +110,14 @@ export class BrowserPaneComponent implements OnInit, AfterViewInit {
         url: e.url
       });
     });
+
+    this.webviewNative.addEventListener('page-title-updated', (e) => {
+      this.userService.getUserData().getTab(this.tabId).getInstance(this.id).setTitle(e.title);
+    });
+
+    this.webviewNative.addEventListener('page-favicon-updated', (e) => {
+      this.userService.getUserData().getTab(this.tabId).getInstance(this.id).setIcon(e.favicons[0]);
+    });
   }
   public navigate(url: string): void {
     if (this.domLoaded) {
