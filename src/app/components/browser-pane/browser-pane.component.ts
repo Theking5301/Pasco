@@ -51,7 +51,6 @@ export class BrowserPaneComponent implements OnInit, AfterViewInit {
     const query = querystring.parse(global.location.search);
     const sanitizedQuery = query['?dirname'].replaceAll('\\', '/');
     this.preload = 'file://' + sanitizedQuery + '/preload.js';
-    console.log(this.preload);
   }
 
   ngOnInit(): void {

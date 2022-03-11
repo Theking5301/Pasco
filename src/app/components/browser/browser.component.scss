@@ -1,5 +1,8 @@
 .browser {
-  height: 100%;
+  height        : calc(100% - 3px);
+  padding-left  : 0.5px;
+  padding-right : 0.5px;
+  padding-bottom: 0.5px;
 }
 
 .visible-container {

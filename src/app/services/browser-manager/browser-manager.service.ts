@@ -31,8 +31,8 @@ export class BrowserManagerService {
     this.focusedInstances = new Map();
     if (userService.getUserData().getTabs().length > 0) {
       this.selectedTab = userService.getUserData().getTabs()[0].getId();
-      if (this.getSelectedTab().getInstances().length > 0) {
-        this.setFocusedInstance(this.selectedTab, this.getSelectedTab().getInstances()[0].getId());
+      for (const tab of userService.getUserData().getTabs()) {
+        this.setFocusedInstance(tab.getId(), tab.getInstances()[0].getId());
       }
     }
   }
@@ -57,7 +57,7 @@ export class BrowserManagerService {
     return this.getFocusedInstance(this.selectedTab);
   }
   public getFocusedInstance(tabId: string): BrowserInstance {
-    return this.userService.getUserData().getTab(this.selectedTab)?.getInstance(this.focusedInstances.get(tabId));
+    return this.userService.getUserData().getTab(tabId)?.getInstance(this.focusedInstances.get(tabId));
   }
   public navigateFocusedInstance(url: string) {
     this.urlNavigate.emit({
@@ -115,7 +115,8 @@ export class BrowserManagerService {
   public addInstanceToTabAfterInstance(tabId: string, instanceId: string, url: string): BrowserInstance {
     const tab = this.userService.getUserData().getTab(tabId);
     const existingIndex = tab.getInstanceIndex(instanceId);
-    const inst = tab.addInstanceAfterIndex(existingIndex + 1, url);
+    const existingInstance = tab.getInstance(instanceId);
+    const inst = tab.addInstanceAfterIndex(existingIndex + 1, existingInstance.getUrl());
     this.userService.syncToDataAccess();
     return inst;
   }
