@@ -38,7 +38,7 @@ export class NavigationBarComponent implements OnInit {
   public formatUrl(url: string): string {
     url = url.trim();
 
-    if (url.indexOf('') >= 1) {
+    if (url.indexOf('.') <= 1) {
       if (!url.startsWith('http://') && !url.startsWith('https://')) {
         url = 'https://' + url;
       }

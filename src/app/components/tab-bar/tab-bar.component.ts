@@ -10,15 +10,15 @@ import { UserDataService } from '../../services/user-data-service/user-data-serv
 })
 export class TabBarComponent implements OnInit {
   public selectedTabId: string;
-  public tabs: BrowserTab[];
 
   constructor(private userService: UserDataService, private manager: BrowserManagerService) {
-    this.tabs = this.userService.getUserData().getTabs();
-    this.selectedTabId = this.userService.getUserData().getTabs()[0].getId();
+
   }
 
   ngOnInit(): void { }
-
+  public getTabs(): BrowserTab[] {
+    return this.userService.getUserData().getTabs();
+  }
   public tabSelected(tabId: string): void {
     this.selectedTabId = tabId;
     this.manager.setSelectedTab(tabId);
