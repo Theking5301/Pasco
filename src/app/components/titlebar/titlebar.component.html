@@ -1,8 +1,7 @@
 <header class="titlebar">
-  <div class="window_control_row" [style.visibility]="showWindowControls ? 'visible' : 'hidden'"
-    (dblclick)="titleBarDoubleClick()" (mousedown)="titleBarMouseDown($event)">
+  <div class="window_control_row" (dblclick)="titleBarDoubleClick()" (mousedown)="titleBarMouseDown($event)">
     <div class="window_spacer"></div>
-    <div class="window_control_button_wrapper">
+    <div class="window_control_button_wrapper" [style.visibility]="showWindowControls ? 'visible' : 'hidden'">
       <button class="window_control_button" (click)="minimize()">
         <img class="window_control_icon" src="assets/icons/minimize.png" alt="Minimize" />
       </button>
