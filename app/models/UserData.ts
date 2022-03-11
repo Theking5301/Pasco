@@ -2,6 +2,7 @@ import { v4 as uuid } from 'uuid';
 
 export class UserData {
   private version: number;
+  private profile: string;
   private tabs: BrowserTab[];
 
   public constructor(json?: any) {

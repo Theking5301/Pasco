@@ -1,5 +1,5 @@
 import { HttpClient, HttpClientModule } from '@angular/common/http';
-import { APP_INITIALIZER, NgModule } from '@angular/core';
+import { APP_INITIALIZER, NgModule, NO_ERRORS_SCHEMA } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 // NG Translate
@@ -7,6 +7,7 @@ import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { BrowserMenuComponent } from './components/browser-menu/browser-menu.component';
 import { BrowserPaneContainerComponent } from './components/browser-pane-container/browser-pane-container.component';
 import { BrowserPaneComponent } from './components/browser-pane/browser-pane.component';
 import { BrowserComponent } from './components/browser/browser.component';
@@ -34,6 +35,9 @@ export function initializeApplication(userData: UserDataService, staticData: Sta
 }
 
 @NgModule({
+  schemas: [
+    NO_ERRORS_SCHEMA
+  ],
   declarations: [
     AppComponent,
     TitlebarComponent,
@@ -42,7 +46,8 @@ export function initializeApplication(userData: UserDataService, staticData: Sta
     NavigationBarComponent,
     TabBarComponent,
     TabComponent,
-    BrowserComponent
+    BrowserComponent,
+    BrowserMenuComponent
   ],
   imports: [
     BrowserModule,

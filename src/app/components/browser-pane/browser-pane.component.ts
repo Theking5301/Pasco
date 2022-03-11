@@ -168,7 +168,6 @@ export class BrowserPaneComponent implements OnInit, AfterViewInit {
   public displayNewInstanceButton() {
     return this.topOverlayHovered;
   }
-
   private webContentsMouseDown(e) {
     this.manager.setCurrentTabFocusedInstance(this.id);
 

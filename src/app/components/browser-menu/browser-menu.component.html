@@ -1,0 +1,11 @@
+<div #menu class="browser-menu" [ngClass]="{'browser-menu-open': isOpen()}">
+  <div *ngFor="let category of categories" class="browser-menu-category">
+    <div *ngFor="let entry of getEntriesForCategory(category)" class="browser-menu-entry"
+      (click)="entryClicked($event, entry)">
+      <div class="browser-menu-entry-label"> {{ entry.name | translate }}</div>
+    </div>
+  </div>
+</div>
+<div class="cover" [ngClass]="{'cover-visible': isOpen()}">
+
+</div>

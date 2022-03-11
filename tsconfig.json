@@ -31,6 +31,7 @@
     "skipTemplateCodegen": true,
     "preserveWhitespaces": true,
     "skipMetadataEmit": false,
-    "disableTypeScriptVersionCheck": true
+    "disableTypeScriptVersionCheck": true,
+	"strictDomEventTypes": false
   }
 }

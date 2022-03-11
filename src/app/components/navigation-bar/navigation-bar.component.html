@@ -10,8 +10,10 @@
       <img class="url_bar_icon" src="assets/icons/refresh.svg" alt="Refresh" />
     </button>
   </div>
-  <input type="text" class="url_bar" [(ngModel)]="url" (keyup.enter)="urlSubmitted($event)" />
+  <input type="text" class="url_bar" [(ngModel)]="url" (click)="$event.target.select()"
+    (keyup.enter)="urlSubmitted($event)" />
   <button class="url_bar_button" (click)="openMenu()">
     <img class="url_bar_icon" src="assets/icons/menu.svg" alt="Menu" />
+    <app-browser-menu #menu (entryclicked)="menuEntryClicked($event)"></app-browser-menu>
   </button>
 </div>
