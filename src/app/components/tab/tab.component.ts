@@ -38,9 +38,9 @@ export class TabComponent implements OnInit {
     this.manager.removeTab(this.tabId);
   }
   public getTabName(): string {
-    return this.userData.getUserData().getTab(this.tabId)?.getInstances()[0].getTitle();
+    return this.manager.getFocusedInstance(this.tabId).getTitle();
   }
   public getTabIconUrl(): string {
-    return this.userData.getUserData().getTab(this.tabId)?.getInstances()[0].getIcon();
+    return this.manager.getFocusedInstance(this.tabId).getIcon();
   }
 }

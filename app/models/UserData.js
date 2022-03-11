@@ -73,6 +73,9 @@ var BrowserTab = /** @class */ (function () {
     BrowserTab.prototype.getName = function () {
         return this.name;
     };
+    BrowserTab.prototype.setName = function (name) {
+        this.name = name;
+    };
     BrowserTab.prototype.getInstance = function (id) {
         for (var _i = 0, _a = this.instances; _i < _a.length; _i++) {
             var instance = _a[_i];
@@ -130,6 +133,18 @@ var BrowserInstance = /** @class */ (function () {
     };
     BrowserInstance.prototype.setUrl = function (url) {
         this.url = url;
+    };
+    BrowserInstance.prototype.getTitle = function () {
+        return this.title;
+    };
+    BrowserInstance.prototype.setTitle = function (title) {
+        this.title = title;
+    };
+    BrowserInstance.prototype.getIcon = function () {
+        return this.icon;
+    };
+    BrowserInstance.prototype.setIcon = function (icon) {
+        this.icon = icon;
     };
     return BrowserInstance;
 }());
