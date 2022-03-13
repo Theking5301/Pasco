@@ -6,7 +6,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "sparrow": {
+    "Sparrow": {
       "root": "",
       "sourceRoot": "src",
       "projectType": "application",
@@ -107,27 +107,27 @@
         "serve": {
           "builder": "@angular-builders/custom-webpack:dev-server",
           "options": {
-            "browserTarget": "sparrow:build"
+            "browserTarget": "Sparrow:build"
           },
           "configurations": {
             "dev": {
-              "browserTarget": "sparrow:build:dev"
+              "browserTarget": "Sparrow:build:dev"
             },
             "production": {
-              "browserTarget": "sparrow:build:production"
+              "browserTarget": "Sparrow:build:production"
             },
             "web": {
-              "browserTarget": "sparrow:build:web"
+              "browserTarget": "Sparrow:build:web"
             },
             "web-production": {
-              "browserTarget": "sparrow:build:web-production"
+              "browserTarget": "Sparrow:build:web-production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "sparrow:build"
+            "browserTarget": "Sparrow:build"
           }
         },
         "test": {
@@ -161,7 +161,7 @@
         }
       }
     },
-    "sparrow-e2e": {
+    "Sparrow-e2e": {
       "root": "e2e",
       "projectType": "application",
       "architect": {
@@ -176,14 +176,14 @@
       }
     }
   },
-  "defaultProject": "sparrow",
+  "defaultProject": "Sparrow",
   "schematics": {
     "@schematics/angular:component": {
-      "prefix": "sparrow",
+      "prefix": "Sparrow",
       "style": "scss"
     },
     "@schematics/angular:directive": {
-      "prefix": "sparrow"
+      "prefix": "Sparrow"
     }
   }
 }
