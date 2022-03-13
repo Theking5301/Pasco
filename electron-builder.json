@@ -20,7 +20,7 @@
     }
   ],
   "win": {
-    "icon": "dist/assets/icons/favicon.256x256.png",
+    "icon": "dist/assets/icons/SparrowIconwindow@0.25x.png",
     "target": [
       "portable"
     ]
