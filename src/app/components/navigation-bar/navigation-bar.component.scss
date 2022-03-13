@@ -59,6 +59,27 @@
   transform: translateY(1px) rotate(180deg);
 }
 
+.right-button-container {
+  display        : flex;
+  width          : 70px;
+  align-items    : stretch;
+  justify-content: space-evenly;
+
+}
+
+.profile-button {
+  width           : 26px;
+  height          : 26px;
+  padding         : 0%;
+  background-color: rgb(120 199 199);
+  border          : 1px solid rgb(115 194 194);
+  border-radius   : 1000px;
+  overflow        : hidden;
+  cursor          : pointer;
+}
+
+.profile-icon {}
+
 .menu-icon {
   filter: brightness(250%);
 }

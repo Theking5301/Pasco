@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { BrowserManagerService } from '../../services/browser-manager/browser-manager.service';
-import { PascoElectronService } from '../../services/pasco-electron/pasco-electron.service';
+import { SparrowElectronService } from '../../services/sparrow-electron/sparrow-electron.service';
 import { UserDataService } from './../../services/user-data-service/user-data-service.service';
 
 
@@ -28,7 +28,7 @@ export class BrowserPaneComponent implements OnInit, AfterViewInit {
   private topButtonFadeOffTimeout: NodeJS.Timeout;
 
 
-  constructor(private electron: PascoElectronService, private userService: UserDataService, private manager: BrowserManagerService) {
+  constructor(private electron: SparrowElectronService, private userService: UserDataService, private manager: BrowserManagerService) {
     this.domLoaded = false;
     this.navigated = new EventEmitter();
     this.manager.registerInstance(this, (e) => {
@@ -62,6 +62,7 @@ export class BrowserPaneComponent implements OnInit, AfterViewInit {
     this.webviewNative.addEventListener('dom-ready', (e) => {
       // Listen for clicks.
       if (!this.firstTimeLoaded) {
+        // Handle IPC messages.
         this.webviewNative.addEventListener('ipc-message', (message) => {
           if (message.channel === 'mousedown') {
             this.webContentsMouseDown(message.args[0]);
@@ -71,13 +72,19 @@ export class BrowserPaneComponent implements OnInit, AfterViewInit {
             this.webContentsAuxClicked(message.args[0]);
           }
         });
-
         // When loading for the first time, display the buttons so the user knows that they're there.
         this.topOverlayHovered = true;
         this.topButtonFadeOffTimeout = setTimeout(() => {
           this.topOverlayHovered = false;
         }, 2000);
       }
+
+
+      // If the page closed, close this instance too.
+      this.webviewNative.addEventListener('close', () => {
+        console.log('close');
+        this.manager.removeInstanceFromTab(this.tabId, this.id);
+      });
 
       // Capture the first time loaded state.
       this.firstTimeLoaded = true;

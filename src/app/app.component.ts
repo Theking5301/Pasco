@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { APP_CONFIG } from '../environments/environment';
-import { PascoElectronService } from './services/pasco-electron/pasco-electron.service';
+import { SparrowElectronService } from './services/sparrow-electron/sparrow-electron.service';
 
 @Component({
   selector: 'app-root',
@@ -10,7 +9,7 @@ import { PascoElectronService } from './services/pasco-electron/pasco-electron.s
 })
 export class AppComponent {
   private platform: string;
-  constructor(private electronService: PascoElectronService, private translate: TranslateService) {
+  constructor(private electronService: SparrowElectronService, private translate: TranslateService) {
     this.translate.setDefaultLang('en');
     electronService.getData('platform').then((response) => {
       console.log(response);

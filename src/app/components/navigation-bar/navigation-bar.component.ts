@@ -1,5 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { BrowserManagerService } from '../../services/browser-manager/browser-manager.service';
+import { SparrowElectronService } from '../../services/sparrow-electron/sparrow-electron.service';
 import { BrowserMenuComponent, IMenuEntryEvent } from './../browser-menu/browser-menu.component';
 
 @Component({
@@ -12,7 +13,7 @@ export class NavigationBarComponent implements OnInit {
   private browserMenu: BrowserMenuComponent;
   public url: string;
 
-  constructor(private manager: BrowserManagerService) {
+  constructor(private manager: BrowserManagerService, private electron: SparrowElectronService) {
     this.url = this.manager.getCurrentTabFocusedInstance().getUrl();
     this.manager.focusedPaneChanged.subscribe((pane) => {
       this.url = this.manager.getCurrentTabFocusedInstance().getUrl();
@@ -73,5 +74,21 @@ export class NavigationBarComponent implements OnInit {
       );
         break;
     }
+  }
+  public openProfileMenu() {
+    this.electron.ipcRenderer.send('sparrow/open-raven-login');
+    // this.openRavenLogin('http://localhost:4200/', 475, 675);
+  }
+
+  private openRavenLogin(url: string, w: number, h: number) {
+    const y = window.outerHeight / 2 + window.screenY - (h / 2);
+    const x = window.outerWidth / 2 + window.screenX - (w / 2);
+    const popup = window.open(url, 'popup', 'toolbar=no, location=no, directories=no, status=no, copyhistory=no, width='
+      + w + ', height=' + h + ', top=' + y + ', left=' + x);
+
+    window.addEventListener('message', (event) => {
+      console.log(event);
+      this.electron.ipcRenderer.send('sparrow/open-raven-login', event.data);
+    }, false);
   }
 }

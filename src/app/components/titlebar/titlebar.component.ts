@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { PascoElectronService } from '../../services/pasco-electron/pasco-electron.service';
+import { SparrowElectronService } from '../../services/sparrow-electron/sparrow-electron.service';
 import { StaticDataService } from '../../services/static-data-service/static-data-service.service';
 
 @Component({
@@ -16,7 +16,7 @@ export class TitlebarComponent implements OnInit {
   private framesMoved;
 
 
-  constructor(private electron: PascoElectronService, private staticData: StaticDataService) {
+  constructor(private electron: SparrowElectronService, private staticData: StaticDataService) {
     this.framesMoved = 0;
     this.showWindowControls = staticData.getStaticData().platform !== 'darwin';
   }
@@ -49,15 +49,15 @@ export class TitlebarComponent implements OnInit {
     this.maximizeRestore();
   }
   public close() {
-    this.electron.ipcRenderer.send('pasco/close');
+    this.electron.ipcRenderer.send('sparrow/close');
   }
   public minimize() {
-    this.electron.ipcRenderer.send('pasco/minimize');
+    this.electron.ipcRenderer.send('sparrow/minimize');
   }
   public maximizeRestore() {
-    this.electron.ipcRenderer.send('pasco/maximize');
+    this.electron.ipcRenderer.send('sparrow/maximize');
   }
   public onDoubleClick() {
-    this.electron.ipcRenderer.send('pasco/maximize');
+    this.electron.ipcRenderer.send('sparrow/maximize');
   }
 }

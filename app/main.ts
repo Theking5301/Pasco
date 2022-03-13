@@ -7,7 +7,7 @@ import * as url from 'url';
 import StaticDataAccess from './services/static-data-access';
 import { UserDataAccess } from './services/user-data-access';
 
-let win: BrowserWindow = null;
+export let win: BrowserWindow = null;
 const args = process.argv.slice(1),
   serve = args.some(val => val === '--serve');
 
@@ -26,7 +26,7 @@ function createWindow(): BrowserWindow {
     height: size.height / 2,
     webPreferences: {
       nodeIntegration: true,
-      nodeIntegrationInSubFrames: true,
+      nodeIntegrationInSubFrames: false,
       allowRunningInsecureContent: (serve) ? true : false,
       webviewTag: true,
       contextIsolation: false
@@ -41,7 +41,7 @@ function createWindow(): BrowserWindow {
       electron: require(path.join(__dirname, '/../node_modules/electron'))
     });
     win.loadURL(url.format({
-      pathname: 'localhost:4200',
+      pathname: 'localhost:4300',
       protocol: 'http:',
       slashes: true,
       query: { "dirname": __dirname }
@@ -74,7 +74,7 @@ function createWindow(): BrowserWindow {
   return win;
 }
 
-ipcMain.on('pasco/maximize', (event, windowId) => {
+ipcMain.on('sparrow/maximize', (event, windowId) => {
   const browserWindow = windowId ? BrowserWindow.fromId(windowId) : BrowserWindow.fromWebContents(event.sender);
   if (browserWindow?.isMaximizable()) {
     if (browserWindow.isMaximized()) {
@@ -85,19 +85,20 @@ ipcMain.on('pasco/maximize', (event, windowId) => {
   }
 });
 
-ipcMain.on('pasco/minimize', (event, windowId) => {
+ipcMain.on('sparrow/minimize', (event, windowId) => {
   const browserWindow = windowId
     ? BrowserWindow.fromId(windowId)
     : BrowserWindow.fromWebContents(event.sender);
   browserWindow?.minimize();
 });
 
-ipcMain.on('pasco/close', (event, windowId) => {
+ipcMain.on('sparrow/close', (event, windowId) => {
   const browserWindow = windowId
     ? BrowserWindow.fromId(windowId)
     : BrowserWindow.fromWebContents(event.sender);
   browserWindow?.close();
 });
+
 ipcMain.on('windowMoving', (e, { windowId, mouseX, mouseY }) => {
   // If we're maximized and moving, unmaximize.
   const browserWindow = windowId ? BrowserWindow.fromId(windowId) : BrowserWindow.fromWebContents(e.sender);
@@ -114,8 +115,8 @@ ipcMain.on('windowMoving', (e, { windowId, mouseX, mouseY }) => {
 
 ipcMain.on('windowMoved', () => { });
 
-ipcMain.on('pasco/get-platform', (event) => {
-  event.sender.send('pasco/platform', process.platform);
+ipcMain.on('sparrow/get-platform', (event) => {
+  event.sender.send('sparrow/platform', process.platform);
 });
 
 

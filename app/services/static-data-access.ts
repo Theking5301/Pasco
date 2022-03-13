@@ -10,8 +10,8 @@ export default class StaticDataAccess {
       platform: os.platform()
     }
 
-    ipcMain.on('pasco/static-data', (event, windowId) => {
-      event.sender.send('pasco/static-data', this.data);
+    ipcMain.on('sparrow/static-data', (event, windowId) => {
+      event.sender.send('sparrow/static-data', this.data);
     });
   }
 }

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { v4 as uuidv4 } from 'uuid';
 import { BrowserInstance, BrowserTab, UserData } from '../../../../app/models/UserData';
-import { PascoElectronService } from '../pasco-electron/pasco-electron.service';
+import { SparrowElectronService } from '../sparrow-electron/sparrow-electron.service';
 
 @Injectable({
   providedIn: 'root'
@@ -9,7 +9,7 @@ import { PascoElectronService } from '../pasco-electron/pasco-electron.service';
 export class UserDataService {
   private userData: UserData;
 
-  constructor(private electron: PascoElectronService) {
+  constructor(private electron: SparrowElectronService) {
     this.userData = new UserData();
   }
 
@@ -18,8 +18,8 @@ export class UserDataService {
   }
   public initialize(): Promise<void> {
     return new Promise((resolve) => {
-      this.electron.ipcRenderer.send('pasco/user-data');
-      this.electron.ipcRenderer.on('pasco/user-data', (event, data) => {
+      this.electron.ipcRenderer.send('sparrow/user-data');
+      this.electron.ipcRenderer.on('sparrow/user-data', (event, data) => {
         if (!data || !data.tabs || data.tabs.length === 0) {
           this.userData = this.createDefaultUserData();
           this.syncToDataAccess();
@@ -31,7 +31,7 @@ export class UserDataService {
     });
   }
   public syncToDataAccess() {
-    this.electron.ipcRenderer.send('pasco/user-data/update', this.userData);
+    this.electron.ipcRenderer.send('sparrow/user-data/update', this.userData);
   }
   private createDefaultUserData(): UserData {
     return new UserData({

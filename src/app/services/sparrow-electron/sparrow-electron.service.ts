@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
-import { app, ipcRenderer, webFrame } from 'electron';
 import * as childProcess from 'child_process';
+import { ipcRenderer, webFrame } from 'electron';
 import * as fs from 'fs';
 
 @Injectable({
   providedIn: 'root'
 })
-export class PascoElectronService {
+export class SparrowElectronService {
   public ipcRenderer: typeof ipcRenderer;
   public webFrame: typeof webFrame;
   public childProcess: typeof childProcess;
@@ -41,9 +41,9 @@ export class PascoElectronService {
     return this.getDataWithArgs(channel, []);
   }
   public getDataWithArgs<T>(channel: string, ...args: any[]): Promise<IpcResponse<T>> {
-    this.ipcRenderer.send('pasco/' + channel, args);
+    this.ipcRenderer.send('sparrow/' + channel, args);
     return new Promise((resolve) => {
-      this.ipcRenderer.on('pasco/' + channel, (event, data) => {
+      this.ipcRenderer.on('sparrow/' + channel, (event, data) => {
         resolve(new IpcResponse(data, event));
       });
     });

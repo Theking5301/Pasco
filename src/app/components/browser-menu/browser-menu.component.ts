@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/member-ordering */
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-import { PascoElectronService } from '../../services/pasco-electron/pasco-electron.service';
+import { SparrowElectronService } from '../../services/sparrow-electron/sparrow-electron.service';
 
 @Component({
   selector: 'app-browser-menu',
@@ -14,7 +14,7 @@ export class BrowserMenuComponent implements OnInit {
   public entries: Map<string, IMenuEntry[]>;
   private open: boolean;
 
-  constructor(private electron: PascoElectronService) {
+  constructor(private electron: SparrowElectronService) {
     this.entryclicked = new EventEmitter();
     this.entries = new Map<string, IMenuEntry[]>();
     this.categories = [];
@@ -45,7 +45,7 @@ export class BrowserMenuComponent implements OnInit {
   public entryClicked(event, entry) {
     // If they requested a close, just close the app.
     if (entry.action === 'exit') {
-      this.electron.ipcRenderer.send('pasco/close');
+      this.electron.ipcRenderer.send('sparrow/close');
     } else {
       this.entryclicked.emit({
         entry

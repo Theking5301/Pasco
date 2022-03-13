@@ -6,7 +6,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "pasco": {
+    "sparrow": {
       "root": "",
       "sourceRoot": "src",
       "projectType": "application",
@@ -107,27 +107,27 @@
         "serve": {
           "builder": "@angular-builders/custom-webpack:dev-server",
           "options": {
-            "browserTarget": "pasco:build"
+            "browserTarget": "sparrow:build"
           },
           "configurations": {
             "dev": {
-              "browserTarget": "pasco:build:dev"
+              "browserTarget": "sparrow:build:dev"
             },
             "production": {
-              "browserTarget": "pasco:build:production"
+              "browserTarget": "sparrow:build:production"
             },
             "web": {
-              "browserTarget": "pasco:build:web"
+              "browserTarget": "sparrow:build:web"
             },
             "web-production": {
-              "browserTarget": "pasco:build:web-production"
+              "browserTarget": "sparrow:build:web-production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "pasco:build"
+            "browserTarget": "sparrow:build"
           }
         },
         "test": {
@@ -161,7 +161,7 @@
         }
       }
     },
-    "pasco-e2e": {
+    "sparrow-e2e": {
       "root": "e2e",
       "projectType": "application",
       "architect": {
@@ -176,14 +176,14 @@
       }
     }
   },
-  "defaultProject": "pasco",
+  "defaultProject": "sparrow",
   "schematics": {
     "@schematics/angular:component": {
-      "prefix": "pasco",
+      "prefix": "sparrow",
       "style": "scss"
     },
     "@schematics/angular:directive": {
-      "prefix": "pasco"
+      "prefix": "sparrow"
     }
   }
 }
