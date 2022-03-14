@@ -12,6 +12,7 @@ export class NavigationBarComponent implements OnInit {
   @ViewChild(BrowserMenuComponent)
   private browserMenu: BrowserMenuComponent;
   public url: string;
+  public refreshIcon: string;
 
   constructor(private manager: BrowserManagerService, private electron: SparrowElectronService) {
     this.url = this.manager.getCurrentTabFocusedInstance().getUrl();
@@ -48,14 +49,30 @@ export class NavigationBarComponent implements OnInit {
     }
     return url;
   }
+  public canGoForward() {
+    return this.manager.canGoForward();
+  }
   public forward() {
-    this.manager.performForward();
+    this.manager.goForward();
+  }
+  public canGoBack() {
+    return this.manager.canGoBack();
   }
   public back() {
-    this.manager.performBack();
+    this.manager.goBack();
   }
   public refresh() {
-    this.manager.performRefresh();
+    this.manager.reload();
+  }
+  public isReloading() {
+    return this.manager.isReloading();
+  }
+  public getReloadIcon() {
+    if (this.isReloading()) {
+      return 'url(assets/icons/stop-refresh.svg) no-repeat center';
+    } else {
+      return 'url(assets/icons/refresh.svg) no-repeat center';
+    }
   }
   public openMenu() {
     this.browserMenu.toggleOpen();

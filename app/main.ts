@@ -4,22 +4,23 @@ import * as contextMenu from 'electron-context-menu';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as url from 'url';
+import { RavenLogin } from './services/raven-login';
 import StaticDataAccess from './services/static-data-access';
 import { UserDataAccess } from './services/user-data-access';
 
-export let win: BrowserWindow = null;
+export let mainWindow: BrowserWindow = null;
+
 const args = process.argv.slice(1),
   serve = args.some(val => val === '--serve');
 
-const services = [new UserDataAccess(), new StaticDataAccess()];
+const services = [new UserDataAccess(), new StaticDataAccess(), new RavenLogin(app, serve)];
 
 function createWindow(): BrowserWindow {
-
   const electronScreen = screen;
   const size = electronScreen.getPrimaryDisplay().workAreaSize;
 
   // Create the browser window.
-  win = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     x: 0,
     y: 0,
     width: size.width / 2,
@@ -36,11 +37,11 @@ function createWindow(): BrowserWindow {
   });
 
   if (serve) {
-    win.webContents.openDevTools();
+    mainWindow.webContents.openDevTools();
     require('electron-reload')(__dirname, {
       electron: require(path.join(__dirname, '/../node_modules/electron'))
     });
-    win.loadURL(url.format({
+    mainWindow.loadURL(url.format({
       pathname: 'localhost:4300',
       protocol: 'http:',
       slashes: true,
@@ -55,7 +56,7 @@ function createWindow(): BrowserWindow {
       pathIndex = '../dist/index.html';
     }
 
-    win.loadURL(url.format({
+    mainWindow.loadURL(url.format({
       pathname: path.join(__dirname, pathIndex),
       protocol: 'file:',
       slashes: true,
@@ -64,18 +65,18 @@ function createWindow(): BrowserWindow {
   }
 
   // Emitted when the window is closed.
-  win.on('closed', () => {
+  mainWindow.on('closed', () => {
     // Dereference the window object, usually you would store window
     // in an array if your app supports multi windows, this is the time
     // when you should delete the corresponding element.
-    win = null;
+    mainWindow = null;
   });
 
-  return win;
+  return mainWindow;
 }
 
-ipcMain.on('sparrow/maximize', (event, windowId) => {
-  const browserWindow = windowId ? BrowserWindow.fromId(windowId) : BrowserWindow.fromWebContents(event.sender);
+ipcMain.on('sparrow/maximize', (event) => {
+  const browserWindow = BrowserWindow.fromWebContents(event.sender);
   if (browserWindow?.isMaximizable()) {
     if (browserWindow.isMaximized()) {
       browserWindow.unmaximize();
@@ -85,23 +86,19 @@ ipcMain.on('sparrow/maximize', (event, windowId) => {
   }
 });
 
-ipcMain.on('sparrow/minimize', (event, windowId) => {
-  const browserWindow = windowId
-    ? BrowserWindow.fromId(windowId)
-    : BrowserWindow.fromWebContents(event.sender);
+ipcMain.on('sparrow/minimize', (event) => {
+  const browserWindow = BrowserWindow.fromWebContents(event.sender);
   browserWindow?.minimize();
 });
 
-ipcMain.on('sparrow/close', (event, windowId) => {
-  const browserWindow = windowId
-    ? BrowserWindow.fromId(windowId)
-    : BrowserWindow.fromWebContents(event.sender);
+ipcMain.on('sparrow/close', (event) => {
+  const browserWindow = BrowserWindow.fromWebContents(event.sender);
   browserWindow?.close();
 });
 
-ipcMain.on('windowMoving', (e, { windowId, mouseX, mouseY }) => {
+ipcMain.on('windowMoving', (e, { mouseX, mouseY }) => {
   // If we're maximized and moving, unmaximize.
-  const browserWindow = windowId ? BrowserWindow.fromId(windowId) : BrowserWindow.fromWebContents(e.sender);
+  const browserWindow = BrowserWindow.fromWebContents(e.sender);
   if (browserWindow?.isMaximizable()) {
     if (browserWindow.isMaximized()) {
       browserWindow.unmaximize();
@@ -110,7 +107,7 @@ ipcMain.on('windowMoving', (e, { windowId, mouseX, mouseY }) => {
 
   // Then move the window.
   const { x, y } = electron.screen.getCursorScreenPoint()
-  win.setPosition(x - mouseX, y - mouseY)
+  mainWindow.setPosition(x - mouseX, y - mouseY)
 });
 
 ipcMain.on('windowMoved', () => { });
@@ -141,7 +138,7 @@ try {
   app.on('activate', () => {
     // On OS X it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
-    if (win === null) {
+    if (mainWindow === null) {
       createWindow();
     }
   });
@@ -152,8 +149,14 @@ try {
       contextMenu({ window: contents, });
     }
   });
-
 } catch (e) {
   // Catch Error
   // throw e;
+}
+
+export function logToDevtools(message) {
+  console.log(message)
+  if (mainWindow && mainWindow.webContents) {
+    mainWindow.webContents.executeJavaScript(`console.log("${message}")`)
+  }
 }

@@ -31,22 +31,6 @@ export class BrowserPaneComponent implements OnInit, AfterViewInit {
   constructor(private electron: SparrowElectronService, private userService: UserDataService, private manager: BrowserManagerService) {
     this.domLoaded = false;
     this.navigated = new EventEmitter();
-    this.manager.registerInstance(this, (e) => {
-      if (e.instanceId === this.id && e.tabId === this.tabId) {
-        this.navigate(e.url);
-      }
-    }, (e) => {
-      if (e.instanceId === this.id && e.tabId === this.tabId) {
-        if (e.event === 'back') {
-          this.webviewNative.goBack();
-        } else if (e.event === 'forward') {
-          this.webviewNative.goForward();
-        } else if (e.event === 'refresh') {
-          this.webviewNative.reload();
-        }
-      }
-    });
-
     const querystring = require('querystring');
     const query = querystring.parse(global.location.search);
     const sanitizedQuery = query['?dirname'].replaceAll('\\', '/');
@@ -55,6 +39,7 @@ export class BrowserPaneComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     this.url = this.userService.getUserData().getTab(this.tabId).getInstance(this.id).getUrl();
+    this.manager.registerInstance(this);
   }
   ngAfterViewInit(): void {
     this.webviewNative = this.webview.nativeElement;
@@ -138,20 +123,38 @@ export class BrowserPaneComponent implements OnInit, AfterViewInit {
   public focused() {
     return this.manager.getCurrentTabFocusedInstance().getId() === this.id;
   }
-  public performBack() {
+  public goBack() {
     if (this.domLoaded) {
       this.webviewNative.goBack();
     }
   }
-  public performForward() {
+  public goForward() {
     if (this.domLoaded) {
       this.webviewNative.goForward();
     }
   }
-  public performRefresh() {
+  public reload() {
     if (this.domLoaded) {
       this.webviewNative.reload();
     }
+  }
+  public isReloading(): boolean {
+    if (this.domLoaded) {
+      return this.webviewNative.isLoading();
+    }
+    return false;
+  }
+  public canGoForward(): boolean {
+    if (this.domLoaded) {
+      return this.webviewNative.canGoForward();
+    }
+    return false;
+  }
+  public canGoBack(): boolean {
+    if (this.domLoaded) {
+      return this.webviewNative.canGoBack();
+    }
+    return false;
   }
   public hasLoadedFirstTime() {
     return this.firstTimeLoaded;

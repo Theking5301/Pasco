@@ -1,21 +1,19 @@
 /* You can add global styles to this file, and also import other style files */
 html,
 body {
-  height     : 100vh;
-  margin     : 0;
-  font-family: sans-serif;
-  overflow   : hidden;
+  height       : 100vh;
+  margin       : 0;
+  font-family  : sans-serif;
+  overflow     : hidden;
+  border-radius: 8px;
 }
 
-.root {
-  border-left : 1px solid transparent;
-  border-right: 1px solid transparent;
-}
+.root {}
 
 .background {
-  border-radius: 8px;
   overflow     : none;
   position     : fixed;
+  border-radius: 8px;
   top          : 0;
   left         : 0;
   margin       : 0;

@@ -1,9 +1,9 @@
 <div class="browser-container">
   <div *ngIf="getInstances()" class="browser-view-container">
-    <div *ngFor="let instance of getInstances()" class="browser-view-container">
+    <div *ngFor="let instance of getInstances(); let i = index" class="browser-view-container">
       <app-browser-pane class="pane" [id]="instance.getId()" [tabId]="tabId">
       </app-browser-pane>
-      <div class="resize-bar"></div>
+      <div *ngIf="i < getInstances().length-1" class="resize-bar"></div>
     </div>
   </div>
 

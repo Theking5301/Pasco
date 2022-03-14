@@ -1,13 +1,20 @@
 <div class="url_bar_container">
   <div class='left-button-container'>
-    <button class="url_bar_button" (click)="back()">
-      <img class="url_bar_icon" src="assets/icons/back-forward.svg" alt="Back" />
+    <button class="url_bar_button" [ngClass]="{'url-bar-button-disabled': !canGoBack()}" (click)="back()">
+      <div class="url_bar_icon back-icon" [ngClass]="{'url-bar-icon-disabled': !canGoBack()}"
+        [ngStyle]="{'-webkit-mask': 'url(assets/icons/back-forward.svg) no-repeat center'}">
+      </div>
     </button>
-    <button class="url_bar_button" (click)="forward()">
-      <img class="url_bar_icon forward-icon " src="assets/icons/back-forward.svg" alt="Forward" />
+
+    <button class="url_bar_button" [ngClass]="{'url-bar-button-disabled': !canGoForward()}" (click)="forward()">
+      <div class="url_bar_icon forward-icon" [ngClass]="{'url-bar-icon-disabled': !canGoForward()}"
+        [ngStyle]="{'-webkit-mask': 'url(assets/icons/back-forward.svg) no-repeat center'}">
+      </div>
     </button>
+
     <button class="url_bar_button" (click)="refresh()">
-      <img class="url_bar_icon" src="assets/icons/refresh.svg" alt="Refresh" />
+      <div class="url_bar_icon refresh-icon" [ngStyle]="{'-webkit-mask': getReloadIcon()}">
+      </div>
     </button>
   </div>
 
@@ -19,7 +26,8 @@
       <img class="profile-icon url_bar_icon" src="assets/icons/blank_profile_picture.png" />
     </button>
     <button class="url_bar_button" (click)="openMenu()">
-      <img class="url_bar_icon menu-icon" src="assets/icons/menu.svg" alt="Menu" />
+      <div class="url_bar_icon" [ngStyle]="{'-webkit-mask': 'url(assets/icons/menu.svg) no-repeat center'}">
+      </div>
       <app-browser-menu #menu (entryclicked)="menuEntryClicked($event)"></app-browser-menu>
     </button>
   </div>

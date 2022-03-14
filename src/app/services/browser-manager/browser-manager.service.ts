@@ -15,26 +15,37 @@ export class BrowserManagerService {
   @Output()
   public urlNavigate: EventEmitter<IUrlNavigateEvent>;
   @Output()
-  public navigate: EventEmitter<INavigateEvent>;
-  @Output()
   public anyInstanceNavigated: EventEmitter<IUrlNavigateEvent>;
 
+  private panes: Map<string, BrowserPaneComponent>;
   private selectedTab: string;
   private focusedInstances: Map<string, string>;
 
   constructor(private userService: UserDataService) {
     this.urlNavigate = new EventEmitter();
-    this.navigate = new EventEmitter();
     this.anyInstanceNavigated = new EventEmitter();
     this.selectedTabChanged = new EventEmitter();
     this.focusedPaneChanged = new EventEmitter();
-    this.focusedInstances = new Map();
+    this.focusedInstances = new Map<string, string>();
+    this.panes = new Map<string, BrowserPaneComponent>();
     if (userService.getUserData().getTabs().length > 0) {
       this.selectedTab = userService.getUserData().getTabs()[0].getId();
       for (const tab of userService.getUserData().getTabs()) {
         this.setFocusedInstance(tab.getId(), tab.getInstances()[0].getId());
       }
     }
+  }
+  public registerInstance(pane: BrowserPaneComponent) {
+    this.panes.set(pane.id, pane);
+    pane.navigated.subscribe((e) => {
+      this.userService.getUserData().getTab(e.tabId)?.getInstance(e.instanceId)?.setUrl(e.url);
+      this.userService.syncToDataAccess();
+      this.anyInstanceNavigated.emit({
+        tabId: e.tabId,
+        instanceId: e.instanceId,
+        url: e.url
+      });
+    });
   }
   public setSelectedTab(tabId: string) {
     console.log('Focused tab changed to: ' + tabId);
@@ -59,29 +70,8 @@ export class BrowserManagerService {
   public getFocusedInstance(tabId: string): BrowserInstance {
     return this.userService.getUserData().getTab(tabId)?.getInstance(this.focusedInstances.get(tabId));
   }
-  public navigateFocusedInstance(url: string) {
-    this.urlNavigate.emit({
-      tabId: this.selectedTab,
-      instanceId: this.focusedInstances.get(this.selectedTab),
-      url
-    });
-    this.getFocusedInstance(this.selectedTab)?.setUrl(url);
-  }
-  public registerInstance(pane: BrowserPaneComponent,
-    urlCallback: (IUrlNavigateEvent) => void,
-    navigateCallback: (INavigateEvent) => void
-  ) {
-    this.urlNavigate.subscribe((e) => urlCallback(e));
-    this.navigate.subscribe((e) => navigateCallback(e));
-    pane.navigated.subscribe((e) => {
-      this.userService.getUserData().getTab(e.tabId)?.getInstance(e.instanceId)?.setUrl(e.url);
-      this.userService.syncToDataAccess();
-      this.anyInstanceNavigated.emit({
-        tabId: e.tabId,
-        instanceId: e.instanceId,
-        url: e.url
-      });
-    });
+  public getPane(tabId: string, instanceId: string): BrowserPaneComponent {
+    return this.panes.get(instanceId);
   }
 
   public addTab(name: string): BrowserTab {
@@ -144,26 +134,35 @@ export class BrowserManagerService {
     this.userService.syncToDataAccess();
   }
 
-  public performBack() {
-    this.navigate.emit({
+  public navigateFocusedInstance(url: string) {
+    this.getFocusedBrowserPane().navigate(url);
+    this.urlNavigate.emit({
       tabId: this.selectedTab,
       instanceId: this.focusedInstances.get(this.selectedTab),
-      event: 'back'
+      url
     });
+    this.getFocusedInstance(this.selectedTab)?.setUrl(url);
   }
-  public performForward() {
-    this.navigate.emit({
-      tabId: this.selectedTab,
-      instanceId: this.focusedInstances.get(this.selectedTab),
-      event: 'forward'
-    });
+  public goBack() {
+    this.getFocusedBrowserPane().goBack();
   }
-  public performRefresh() {
-    this.navigate.emit({
-      tabId: this.selectedTab,
-      instanceId: this.focusedInstances.get(this.selectedTab),
-      event: 'refresh'
-    });
+  public goForward() {
+    this.getFocusedBrowserPane().goForward();
+  }
+  public reload() {
+    this.getFocusedBrowserPane().reload();
+  }
+  public isReloading() {
+    return this.getFocusedBrowserPane().isReloading();
+  }
+  public canGoForward(): boolean {
+    return this.getFocusedBrowserPane().canGoForward();
+  }
+  public canGoBack(): boolean {
+    return this.getFocusedBrowserPane().canGoBack();
+  }
+  public getFocusedBrowserPane(): BrowserPaneComponent {
+    return this.panes.get(this.getCurrentTabFocusedInstance().getId());
   }
 }
 export interface IUrlNavigateEvent {
