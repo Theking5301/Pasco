@@ -11,7 +11,7 @@ export class UserDataService {
 
   constructor(private electron: SparrowElectronService) {
     this.userData = new UserData();
-    this.electron.ipcRenderer.send('sparrow/raven-token-prompt');
+    this.electron.ipcRenderer.send('sparrow/raven-token');
     this.electron.ipcRenderer.on('sparrow/raven-token', (event, data) => {
       console.log(data);
     });
