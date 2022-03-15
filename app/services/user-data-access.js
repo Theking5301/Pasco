@@ -4,7 +4,6 @@ exports.UserDataAccess = void 0;
 var electron_1 = require("electron");
 var fs = require("fs");
 var UserData_1 = require("../models/UserData");
-var keytar = require('keytar');
 var UserDataAccess = /** @class */ (function () {
     function UserDataAccess() {
         var _this = this;

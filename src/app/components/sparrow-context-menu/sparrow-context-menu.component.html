@@ -1,0 +1,9 @@
+<div sparrowClickOutside class="context-menu" [ngClass]="{'context-menu-open': isOpen()}"
+  (clickOutside)="clickedOutside()">
+  <div *ngFor="let category of categories" class="context-menu-category">
+    <div *ngFor="let entry of getEntriesForCategory(category)" class="context-menu-entry"
+      (click)="entryClicked($event, entry)">
+      <div class="context-menu-entry-label"> {{ entry.name | translate }}</div>
+    </div>
+  </div>
+</div>

@@ -12,10 +12,12 @@ import { BrowserPaneContainerComponent } from './components/browser-pane-contain
 import { BrowserPaneComponent } from './components/browser-pane/browser-pane.component';
 import { BrowserComponent } from './components/browser/browser.component';
 import { NavigationBarComponent } from './components/navigation-bar/navigation-bar.component';
+import { SparrowContextMenuComponent } from './components/sparrow-context-menu/sparrow-context-menu.component';
 import { TabBarComponent } from './components/tab-bar/tab-bar.component';
 import { TabComponent } from './components/tab/tab.component';
 import { TitlebarComponent } from './components/titlebar/titlebar.component';
 import { DetailModule } from './detail/detail.module';
+import { ClickOutsideDirective } from './directives/click-outside.directive';
 import { StaticDataService } from './services/static-data-service/static-data-service.service';
 import { UserDataService } from './services/user-data-service/user-data-service.service';
 import { SharedModule } from './shared/shared.module';
@@ -47,7 +49,9 @@ export function initializeApplication(userData: UserDataService, staticData: Sta
     TabBarComponent,
     TabComponent,
     BrowserComponent,
-    BrowserMenuComponent
+    BrowserMenuComponent,
+    SparrowContextMenuComponent,
+    ClickOutsideDirective
   ],
   imports: [
     BrowserModule,

@@ -28,7 +28,7 @@
     <button class="url_bar_button" (click)="openMenu()">
       <div class="url_bar_icon" [ngStyle]="{'-webkit-mask': 'url(assets/icons/menu.svg) no-repeat center'}">
       </div>
-      <app-browser-menu #menu (entryclicked)="menuEntryClicked($event)"></app-browser-menu>
     </button>
+    <app-browser-menu #browserMenu (entryclicked)="menuEntryClicked($event)"></app-browser-menu>
   </div>
 </div>

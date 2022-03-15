@@ -48,10 +48,12 @@ export class BrowserManagerService {
     });
   }
   public setSelectedTab(tabId: string) {
-    console.log('Focused tab changed to: ' + tabId);
-    this.selectedTab = tabId;
-    this.setFocusedInstance(tabId, this.getSelectedTab().getInstances()[0].getId());
-    this.selectedTabChanged.emit(this.selectedTab);
+    if (this.selectedTab !== tabId) {
+      console.log('Focused tab changed to: ' + tabId);
+      this.selectedTab = tabId;
+      this.setFocusedInstance(tabId, this.getSelectedTab().getInstances()[0].getId());
+      this.selectedTabChanged.emit(this.selectedTab);
+    }
   }
   public getSelectedTab(): BrowserTab {
     return this.userService.getUserData().getTab(this.selectedTab);
@@ -60,9 +62,11 @@ export class BrowserManagerService {
     this.setFocusedInstance(this.selectedTab, focusedInstanceId);
   }
   public setFocusedInstance(tabId: string, focusedInstanceId: string) {
-    this.focusedInstances.set(tabId, focusedInstanceId);
-    console.log('Focused instance changed to: ' + focusedInstanceId);
-    this.focusedPaneChanged.emit(focusedInstanceId);
+    if (!this.focusedInstances.has(tabId) || this.focusedInstances.get(tabId) !== focusedInstanceId) {
+      this.focusedInstances.set(tabId, focusedInstanceId);
+      console.log('Focused instance changed to: ' + focusedInstanceId);
+      this.focusedPaneChanged.emit(focusedInstanceId);
+    }
   }
   public getCurrentTabFocusedInstance(): BrowserInstance {
     return this.getFocusedInstance(this.selectedTab);

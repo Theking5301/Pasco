@@ -4,23 +4,25 @@ import * as contextMenu from 'electron-context-menu';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as url from 'url';
-import { RavenLogin } from './services/raven-login';
-import StaticDataAccess from './services/static-data-access';
-import { UserDataAccess } from './services/user-data-access';
+import { ServiceCollection } from './ServiceCollections';
 
-export let mainWindow: BrowserWindow = null;
+const ARGS = process.argv.slice(1);
+export let MAIN_WINDOW: BrowserWindow = null;
+export const IS_DEV = ARGS.some(val => val === '--serve');
+export const SERVICE_COLLECTION = new ServiceCollection(app, IS_DEV);
 
-const args = process.argv.slice(1),
-  serve = args.some(val => val === '--serve');
-
-const services = [new UserDataAccess(), new StaticDataAccess(), new RavenLogin(app, serve)];
+contextMenu({
+  prepend: (params, browserWindow) => [{
+    label: 'Rainbow',
+  }]
+});
 
 function createWindow(): BrowserWindow {
   const electronScreen = screen;
   const size = electronScreen.getPrimaryDisplay().workAreaSize;
 
   // Create the browser window.
-  mainWindow = new BrowserWindow({
+  MAIN_WINDOW = new BrowserWindow({
     x: 0,
     y: 0,
     width: size.width / 2,
@@ -28,7 +30,7 @@ function createWindow(): BrowserWindow {
     webPreferences: {
       nodeIntegration: true,
       nodeIntegrationInSubFrames: false,
-      allowRunningInsecureContent: (serve) ? true : false,
+      allowRunningInsecureContent: (IS_DEV) ? true : false,
       webviewTag: true,
       contextIsolation: false
     },
@@ -36,12 +38,12 @@ function createWindow(): BrowserWindow {
     titleBarStyle: 'hidden',
   });
 
-  if (serve) {
-    mainWindow.webContents.openDevTools();
+  if (IS_DEV) {
+    MAIN_WINDOW.webContents.openDevTools();
     require('electron-reload')(__dirname, {
       electron: require(path.join(__dirname, '/../node_modules/electron'))
     });
-    mainWindow.loadURL(url.format({
+    MAIN_WINDOW.loadURL(url.format({
       pathname: 'localhost:4300',
       protocol: 'http:',
       slashes: true,
@@ -56,7 +58,7 @@ function createWindow(): BrowserWindow {
       pathIndex = '../dist/index.html';
     }
 
-    mainWindow.loadURL(url.format({
+    MAIN_WINDOW.loadURL(url.format({
       pathname: path.join(__dirname, pathIndex),
       protocol: 'file:',
       slashes: true,
@@ -65,14 +67,14 @@ function createWindow(): BrowserWindow {
   }
 
   // Emitted when the window is closed.
-  mainWindow.on('closed', () => {
+  MAIN_WINDOW.on('closed', () => {
     // Dereference the window object, usually you would store window
     // in an array if your app supports multi windows, this is the time
     // when you should delete the corresponding element.
-    mainWindow = null;
+    MAIN_WINDOW = null;
   });
 
-  return mainWindow;
+  return MAIN_WINDOW;
 }
 
 ipcMain.on('sparrow/maximize', (event) => {
@@ -107,7 +109,7 @@ ipcMain.on('windowMoving', (e, { mouseX, mouseY }) => {
 
   // Then move the window.
   const { x, y } = electron.screen.getCursorScreenPoint()
-  mainWindow.setPosition(x - mouseX, y - mouseY)
+  MAIN_WINDOW.setPosition(x - mouseX, y - mouseY)
 });
 
 ipcMain.on('windowMoved', () => { });
@@ -138,7 +140,7 @@ try {
   app.on('activate', () => {
     // On OS X it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
-    if (mainWindow === null) {
+    if (MAIN_WINDOW === null) {
       createWindow();
     }
   });
@@ -156,7 +158,7 @@ try {
 
 export function logToDevtools(message) {
   console.log(message)
-  if (mainWindow && mainWindow.webContents) {
-    mainWindow.webContents.executeJavaScript(`console.log("${message}")`)
+  if (MAIN_WINDOW && MAIN_WINDOW.webContents) {
+    MAIN_WINDOW.webContents.executeJavaScript(`console.log("${message.toString()}")`)
   }
 }

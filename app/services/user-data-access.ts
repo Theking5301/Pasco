@@ -1,7 +1,6 @@
 import { app, ipcMain } from 'electron';
 import * as fs from 'fs';
 import { UserData } from '../models/UserData';
-const keytar = require('keytar')
 
 export class UserDataAccess {
   private cachedData: UserData;

@@ -53,8 +53,11 @@ export class BrowserPaneComponent implements OnInit, AfterViewInit {
             this.webContentsMouseDown(message.args[0]);
           } else if (message.channel === 'click') {
             this.webContentsClicked(message.args[0]);
+            this.webviewNative.click();
           } else if (message.channel === 'auxclick') {
             this.webContentsAuxClicked(message.args[0]);
+          } else if (message.channel === 'contextmenu') {
+            console.log(message.args);
           }
         });
         // When loading for the first time, display the buttons so the user knows that they're there.

@@ -1,7 +1,8 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { BrowserManagerService } from '../../services/browser-manager/browser-manager.service';
 import { SparrowElectronService } from '../../services/sparrow-electron/sparrow-electron.service';
-import { BrowserMenuComponent, IMenuEntryEvent } from './../browser-menu/browser-menu.component';
+import { IMenuEntryEvent } from '../sparrow-context-menu/sparrow-context-menu.component';
+import { BrowserMenuComponent } from './../browser-menu/browser-menu.component';
 
 @Component({
   selector: 'app-navigation-bar',
