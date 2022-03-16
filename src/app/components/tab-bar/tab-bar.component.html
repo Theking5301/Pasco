@@ -1,8 +1,12 @@
-<div class="tab-bar-container">
-  <app-tab *ngFor="let tab of getTabs()" [active]="isSelectedTab(tab.getId())" [tabId]="tab.getId()"
-    [name]="tab.getName()" (tabselected)="tabSelected($event)">
-  </app-tab>
+<div class="tab-bar-container" [ngClass]="{'tab-bar-container-macos': isMacOS, 'tab-bar-container-other': !isMacOS}">
+  <div class="tab-wrapper" *ngFor="let tab of getTabs()">
+    <app-tab [active]="isSelectedTab(tab.getId())" [tabId]="tab.getId()" (tabselected)="tabSelected($event)">
+    </app-tab>
+  </div>
   <button class='new-tab-button' (click)="newTabClicked()">
     <img class="new-tab-icon" src="assets/icons/new-tab.svg" alt="New Tab" />
   </button>
+  <div sparrowWindowDragControl class="spacer">
+
+  </div>
 </div>

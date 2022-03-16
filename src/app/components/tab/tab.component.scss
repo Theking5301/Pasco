@@ -1,22 +1,17 @@
 .tab {
   display                : flex;
-  position               : relative;
   align-items            : center;
-  width                  : 200px;
-  flex-grow              : 1;
-  height                 : 18px;
+  justify-content        : space-between;
+  position               : relative;
+  height                 : 32px;
   background-color       : rgba(255, 255, 255, 0.2);
   border-top-left-radius : 8px;
   border-top-right-radius: 8px;
-  padding                : 8px;
-  padding-left           : 12px;
   box-shadow             : 0px 0px 5px 0px rgba(0, 0, 0, 0.05);
   transition             : 20ms all ease-in-out;
   cursor                 : pointer;
   user-select            : none;
 }
-
-.tab-on {}
 
 .tab:hover {
   background-color: rgba(255, 255, 255, 0.6);
@@ -42,6 +37,7 @@
   box-shadow: 10px 0 0 0 rgb(255, 255, 255);
 }
 
+
 .tab-active {
   background-color: rgba(255, 255, 255, 1.0);
 }
@@ -62,35 +58,43 @@
   box-shadow   : 10px 0 0 0 #fff;
 }
 
+.tab-icon-container {
+  width        : 20px;
+  height       : 20px;
+  padding-left : 8px;
+  padding-right: 6px;
+
+}
+
 .tab-icon {
-  width       : 20px;
-  height      : 20px;
-  margin-right: 10px;
+  width : 20px;
+  height: 20px;
 }
 
 .tab-title {
   flex-grow    : 1;
-  color        : rgb(10, 10, 10);
-  font-size    : 14px;
+  color        : rgb(50, 50, 50);
+  font-size    : 12px;
   overflow     : hidden;
   white-space  : nowrap;
-  text-overflow: ellipsis ellipsis;
+  text-overflow: ellipsis;
 }
 
 .close-button {
   border          : none;
   background-color: transparent;
+  padding         : 0px;
+  user-select     : none;
 }
 
 .close-icon {
-  width     : 20px;
-  height    : 20px;
-  opacity   : 0.5;
-  position  : relative;
-  top       : 2px;
-  right     : -5px;
-  cursor    : pointer;
-  transition: 100ms all;
+  width        : 20px;
+  height       : 20px;
+  padding-right: 8px;
+  opacity      : 0.5;
+  cursor       : pointer;
+  transition   : 100ms all;
+  user-select  : none;
 }
 
 .close-icon:hover {

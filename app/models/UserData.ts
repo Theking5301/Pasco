@@ -1,13 +1,39 @@
 import { v4 as uuid } from 'uuid';
 
 export class UserData {
-  private version: number;
-  private profile: string;
-  private tabs: BrowserTab[];
+  public version: number;
+  public ravenId: string;
+  public profile: string;
+  public lastModified: number;
+  private browsers: BrowserState[];
 
   public constructor(json?: any) {
     if (json) {
       this.version = json.version;
+      this.ravenId = json.ravenId;
+      this.browsers = [];
+      for (const t of json.browsers) {
+        this.browsers.push(new BrowserState(t));
+      }
+    }
+  }
+
+  public getBrowser(id: string): BrowserState {
+    for (const browser of this.browsers) {
+      if (browser.getId() === id) {
+        return browser;
+      }
+    }
+    return undefined;
+  }
+}
+export class BrowserState {
+  private id: string;
+  private tabs: BrowserTab[];
+
+  public constructor(json?: any) {
+    if (json) {
+      this.id = json.id;
       this.tabs = [];
       for (const t of json.tabs) {
         this.tabs.push(new BrowserTab(t));
@@ -15,6 +41,9 @@ export class UserData {
     }
   }
 
+  public getId(): string {
+    return this.id;
+  }
   public getTab(id: string): BrowserTab {
     for (const tab of this.tabs) {
       if (tab.getId() === id) {
@@ -28,12 +57,12 @@ export class UserData {
     return this.tabs;
   }
 
-  public addTab(name: string): BrowserTab {
+  public addTab(name: string, url?: string): BrowserTab {
     const tab = new BrowserTab({
       name,
       id: uuid(),
       instances: [
-        new BrowserInstance({ id: uuid(), url: 'https://www.google.com' })
+        new BrowserInstance({ id: uuid(), url: url ? url : 'https://www.google.com' })
       ]
     });
     this.tabs.push(tab);
@@ -57,17 +86,14 @@ export class UserData {
     }
     return index;
   }
-
 }
 export class BrowserTab {
   private id: string;
-  private name: string;
   private instances: BrowserInstance[];
 
   public constructor(json?: any) {
     if (json) {
       this.id = json.id;
-      this.name = json.name;
       this.instances = [];
       for (const t of json.instances) {
         this.instances.push(new BrowserInstance(t));
@@ -77,12 +103,6 @@ export class BrowserTab {
 
   public getId(): string {
     return this.id;
-  }
-  public getName(): string {
-    return this.name;
-  }
-  public setName(name: string) {
-    this.name = name;
   }
 
   public getInstance(id: string): BrowserInstance {
@@ -136,6 +156,8 @@ export class BrowserInstance {
     if (json) {
       this.id = json.id;
       this.url = json.url;
+      this.title = json.title;
+      this.icon = json.icon;
     }
   }
   public getId() {

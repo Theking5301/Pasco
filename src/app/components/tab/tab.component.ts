@@ -1,6 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { BrowserManagerService } from '../../services/browser-manager/browser-manager.service';
-import { UserDataService } from '../../services/user-data-service/user-data-service.service';
 
 @Component({
   selector: 'app-tab',
@@ -15,7 +14,7 @@ export class TabComponent implements OnInit {
   @Output()
   public tabselected: EventEmitter<string>;
 
-  constructor(private userData: UserDataService, private manager: BrowserManagerService) {
+  constructor(private manager: BrowserManagerService) {
     this.tabselected = new EventEmitter();
   }
 

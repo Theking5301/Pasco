@@ -1,4 +1,5 @@
 import { ipcMain } from "electron";
+import { APP_DIRECTORY } from "../../main";
 
 const os = require('os');
 
@@ -7,7 +8,8 @@ export default class StaticDataAccess {
 
   public constructor() {
     this.data = {
-      platform: os.platform()
+      platform: os.platform(),
+      appDirectory: APP_DIRECTORY
     }
 
     ipcMain.on('sparrow/static-data', (event, windowId) => {
@@ -17,4 +19,5 @@ export default class StaticDataAccess {
 }
 export interface IStaticData {
   platform: string;
+  appDirectory: string;
 }

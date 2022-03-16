@@ -21,10 +21,16 @@ window.addEventListener(
   },
   true
 );
+window.addEventListener(
+  "mousemove",
+  (e) => {
+    ipcRenderer.sendToHost("mousemove", { x: e.x, y: e.y });
+  },
+  true
+);
 
 window.addEventListener("load", (event) => {
   document.oncontextmenu = (e) => {
-    console.log(e);
     ipcRenderer.sendToHost("contextmenu", { event: JSON.stringify(e) });
   };
 });

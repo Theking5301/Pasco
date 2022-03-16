@@ -2,10 +2,10 @@ import { App, BrowserWindow, ipcMain } from 'electron';
 import jwt_decode, { JwtPayload } from "jwt-decode";
 import * as keytar from 'keytar';
 import * as path from 'path';
-import { logToDevtools, MAIN_WINDOW } from '../main';
+import { logToDevtools, MAIN_WINDOW } from '../../main';
 
 const RAVEN_WINDOW_WIDTH = 475;
-const RAVEN_WINDOW_HEIGHT = 675;
+const RAVEN_WINDOW_HEIGHT = 700;
 
 export class RavenLogin {
   private ravenWindow: BrowserWindow;
@@ -43,10 +43,12 @@ export class RavenLogin {
 
     // Handle requests to get the raven token.
     ipcMain.on('sparrow/raven-token', async (event) => {
-      event.sender.send('sparrow/raven-token', await this.getValidAccessToken(false));
+      const token = await this.getValidAccessToken(false);
+      event.sender.send('sparrow/raven-token', token);
     });
     ipcMain.on('sparrow/raven-token-prompt', async (event) => {
-      event.sender.send('sparrow/raven-token', await this.getValidAccessToken(true));
+      const token = await this.getValidAccessToken(true);
+      event.sender.send('sparrow/raven-token', token);
     });
 
 
@@ -79,6 +81,43 @@ export class RavenLogin {
     app.on('open-url', (event, url) => {
       this.handleRedirect(url);
     });
+  }
+  public async getValidAccessToken(promptIfInvalid: boolean): Promise<IRavenTokens> {
+    let tokens = await this.getRavenTokens();
+
+    // If the token is expired, prompt for relog (later change this to use the refresh token).
+    if (promptIfInvalid) {
+      if (tokens.decodedToken == undefined || Date.now() >= tokens.decodedToken.exp * 1000) {
+        if (tokens.decodedToken) {
+          logToDevtools(tokens.decodedToken.exp * 1000);
+          logToDevtools(Date.now());
+        }
+        await this.promptForRavenLogin();
+        tokens = await this.getRavenTokens();
+      }
+    }
+    return tokens;
+  }
+  public async getRavenTokens(): Promise<IRavenTokens> {
+    try {
+      const accounts = await keytar.findCredentials('Raven');
+      const key = accounts[0].password;
+      const decodedKey = Buffer.from(key, 'base64').toString();
+      const parsedTokens = JSON.parse(decodedKey);
+      return {
+        accessToken: parsedTokens.accessToken,
+        refreshToken: parsedTokens.refreshToken,
+        tokenType: parsedTokens.tokenType,
+        decodedToken: jwt_decode(parsedTokens.accessToken)
+      };
+    } catch {
+      return {
+        accessToken: undefined,
+        refreshToken: undefined,
+        tokenType: undefined,
+        decodedToken: undefined
+      };
+    }
   }
   private async handleRedirect(url: string): Promise<void> {
     const tokens = this.stripTokensFromRedirect(url);
@@ -127,43 +166,6 @@ export class RavenLogin {
       tokens: tokens,
       decodedToken: jwt_decode(tokens.accessToken)
     };
-  }
-  private async getValidAccessToken(promptIfInvalid: boolean): Promise<string> {
-    let tokens = await this.getRavenTokens();
-
-    // If the token is expired, prompt for relog (later change this to use the refresh token).
-    if (promptIfInvalid) {
-      if (tokens.decodedToken == undefined || Date.now() >= tokens.decodedToken.exp * 1000) {
-        if (tokens.decodedToken) {
-          logToDevtools(tokens.decodedToken.exp * 1000);
-          logToDevtools(Date.now());
-        }
-        await this.promptForRavenLogin();
-        tokens = await this.getRavenTokens();
-      }
-    }
-    return tokens.accessToken;
-  }
-  private async getRavenTokens(): Promise<IRavenTokens> {
-    try {
-      const accounts = await keytar.findCredentials('Raven');
-      const key = accounts[0].password;
-      const decodedKey = Buffer.from(key, 'base64').toString();
-      const parsedTokens = JSON.parse(decodedKey);
-      return {
-        accessToken: parsedTokens.accessToken,
-        refreshToken: parsedTokens.refreshToken,
-        tokenType: parsedTokens.tokenType,
-        decodedToken: jwt_decode(parsedTokens.accessToken)
-      };
-    } catch {
-      return {
-        accessToken: undefined,
-        refreshToken: undefined,
-        tokenType: undefined,
-        decodedToken: undefined
-      };
-    }
   }
 }
 interface IRavenRedirectContents {

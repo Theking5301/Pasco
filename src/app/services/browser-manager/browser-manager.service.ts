@@ -28,9 +28,9 @@ export class BrowserManagerService {
     this.focusedPaneChanged = new EventEmitter();
     this.focusedInstances = new Map<string, string>();
     this.panes = new Map<string, BrowserPaneComponent>();
-    if (userService.getUserData().getTabs().length > 0) {
-      this.selectedTab = userService.getUserData().getTabs()[0].getId();
-      for (const tab of userService.getUserData().getTabs()) {
+    if (userService.getBrowserData().getTabs().length > 0) {
+      this.selectedTab = userService.getBrowserData().getTabs()[0].getId();
+      for (const tab of userService.getBrowserData().getTabs()) {
         this.setFocusedInstance(tab.getId(), tab.getInstances()[0].getId());
       }
     }
@@ -38,7 +38,7 @@ export class BrowserManagerService {
   public registerInstance(pane: BrowserPaneComponent) {
     this.panes.set(pane.id, pane);
     pane.navigated.subscribe((e) => {
-      this.userService.getUserData().getTab(e.tabId)?.getInstance(e.instanceId)?.setUrl(e.url);
+      this.userService.getBrowserData().getTab(e.tabId)?.getInstance(e.instanceId)?.setUrl(e.url);
       this.userService.syncToDataAccess();
       this.anyInstanceNavigated.emit({
         tabId: e.tabId,
@@ -56,7 +56,7 @@ export class BrowserManagerService {
     }
   }
   public getSelectedTab(): BrowserTab {
-    return this.userService.getUserData().getTab(this.selectedTab);
+    return this.userService.getBrowserData().getTab(this.selectedTab);
   }
   public setCurrentTabFocusedInstance(focusedInstanceId: string) {
     this.setFocusedInstance(this.selectedTab, focusedInstanceId);
@@ -68,55 +68,54 @@ export class BrowserManagerService {
       this.focusedPaneChanged.emit(focusedInstanceId);
     }
   }
-  public getCurrentTabFocusedInstance(): BrowserInstance {
+  public getSelectedTabFocusedInstance(): BrowserInstance {
     return this.getFocusedInstance(this.selectedTab);
   }
   public getFocusedInstance(tabId: string): BrowserInstance {
-    return this.userService.getUserData().getTab(tabId)?.getInstance(this.focusedInstances.get(tabId));
+    return this.userService.getBrowserData().getTab(tabId)?.getInstance(this.focusedInstances.get(tabId));
   }
   public getPane(tabId: string, instanceId: string): BrowserPaneComponent {
     return this.panes.get(instanceId);
   }
-
-  public addTab(name: string): BrowserTab {
-    const newTab = this.userService.getUserData().addTab(name);
-    this.setSelectedTab(newTab.getId());
-    this.setFocusedInstance(newTab.getId(), newTab.getInstances()[0].getId());
+  public addTab(name: string, focus: boolean, url?: string): BrowserTab {
+    const newTab = this.userService.getBrowserData().addTab(name, url);
+    if (focus) {
+      this.setSelectedTab(newTab.getId());
+      this.setFocusedInstance(newTab.getId(), newTab.getInstances()[0].getId());
+    }
     this.userService.syncToDataAccess();
     return newTab;
   }
-
   public removeTab(tabId: string) {
-    const index = this.userService.getUserData().getTabIndex(tabId);
-    this.userService.getUserData().removeTab(tabId);
+    const index = this.userService.getBrowserData().getTabIndex(tabId);
+    this.userService.getBrowserData().removeTab(tabId);
 
     if (this.selectedTab === tabId) {
-      if (this.userService.getUserData().getTabs().length > 0) {
-        this.setSelectedTab(this.userService.getUserData().getTabs()[Math.max(0, index - 1)].getId());
+      if (this.userService.getBrowserData().getTabs().length > 0) {
+        this.setSelectedTab(this.userService.getBrowserData().getTabs()[Math.max(0, index - 1)].getId());
       } else {
-        this.addTab('New Tab');
+        this.addTab('New Tab', true);
       }
     }
 
     this.userService.syncToDataAccess();
   }
-
   public addInstanceToTab(tabId: string, url: string): BrowserInstance {
-    const inst = this.userService.getUserData().getTab(tabId).addInstance(url);
+    const inst = this.userService.getBrowserData().getTab(tabId).addInstance(url);
     this.userService.syncToDataAccess();
     return inst;
   }
-  public addInstanceToTabAfterInstance(tabId: string, instanceId: string, url: string): BrowserInstance {
-    const tab = this.userService.getUserData().getTab(tabId);
+  public addInstanceToTabAfterInstance(tabId: string, instanceId: string, url?: string): BrowserInstance {
+    const tab = this.userService.getBrowserData().getTab(tabId);
     const existingIndex = tab.getInstanceIndex(instanceId);
     const existingInstance = tab.getInstance(instanceId);
-    const inst = tab.addInstanceAfterIndex(existingIndex + 1, existingInstance.getUrl());
+    const inst = tab.addInstanceAfterIndex(existingIndex + 1, url ? url : existingInstance.getUrl());
     this.userService.syncToDataAccess();
     return inst;
   }
   public removeInstanceFromTab(tabId: string, instanceId: string) {
     // Capture the index of the existing instance and remove it.
-    const tab = this.userService.getUserData().getTab(tabId);
+    const tab = this.userService.getBrowserData().getTab(tabId);
     const index = tab.getInstanceIndex(instanceId);
     tab.removeInstance(instanceId);
     console.log('Removed instance with Id: ' + instanceId);
@@ -137,7 +136,6 @@ export class BrowserManagerService {
 
     this.userService.syncToDataAccess();
   }
-
   public navigateFocusedInstance(url: string) {
     this.getFocusedBrowserPane().navigate(url);
     this.urlNavigate.emit({
@@ -166,7 +164,7 @@ export class BrowserManagerService {
     return this.getFocusedBrowserPane().canGoBack();
   }
   public getFocusedBrowserPane(): BrowserPaneComponent {
-    return this.panes.get(this.getCurrentTabFocusedInstance().getId());
+    return this.panes.get(this.getSelectedTabFocusedInstance().getId());
   }
 }
 export interface IUrlNavigateEvent {

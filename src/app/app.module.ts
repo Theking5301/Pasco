@@ -16,11 +16,11 @@ import { SparrowContextMenuComponent } from './components/sparrow-context-menu/s
 import { TabBarComponent } from './components/tab-bar/tab-bar.component';
 import { TabComponent } from './components/tab/tab.component';
 import { TitlebarComponent } from './components/titlebar/titlebar.component';
-import { DetailModule } from './detail/detail.module';
 import { ClickOutsideDirective } from './directives/click-outside.directive';
 import { StaticDataService } from './services/static-data-service/static-data-service.service';
 import { UserDataService } from './services/user-data-service/user-data-service.service';
 import { SharedModule } from './shared/shared.module';
+import { WindowDragControlDirective } from './directives/window-drag-control.directive';
 
 
 // AoT requires an exported function for factories
@@ -51,14 +51,14 @@ export function initializeApplication(userData: UserDataService, staticData: Sta
     BrowserComponent,
     BrowserMenuComponent,
     SparrowContextMenuComponent,
-    ClickOutsideDirective
+    ClickOutsideDirective,
+    WindowDragControlDirective
   ],
   imports: [
     BrowserModule,
     FormsModule,
     HttpClientModule,
     SharedModule,
-    DetailModule,
     AppRoutingModule,
     TranslateModule.forRoot({
       loader: {

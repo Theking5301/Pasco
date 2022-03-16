@@ -1,5 +1,5 @@
 <header class="titlebar">
-  <div class="window_control_row" (dblclick)="titleBarDoubleClick()" (mousedown)="titleBarMouseDown($event)">
+  <div sparrowWindowDragControl class="window_control_row" (dblclick)="titleBarDoubleClick()">
     <div class="window_spacer"></div>
     <div class="window_control_button_wrapper" [style.visibility]="showWindowControls ? 'visible' : 'hidden'">
       <button class="window_control_button" (click)="minimize()">

@@ -41,9 +41,9 @@ var electron_1 = require("electron");
 var jwt_decode_1 = require("jwt-decode");
 var keytar = require("keytar");
 var path = require("path");
-var main_1 = require("../main");
+var main_1 = require("../../main");
 var RAVEN_WINDOW_WIDTH = 475;
-var RAVEN_WINDOW_HEIGHT = 675;
+var RAVEN_WINDOW_HEIGHT = 700;
 var RavenLogin = /** @class */ (function () {
     function RavenLogin(app, isDev) {
         var _this = this;
@@ -78,29 +78,25 @@ var RavenLogin = /** @class */ (function () {
         });
         // Handle requests to get the raven token.
         electron_1.ipcMain.on('sparrow/raven-token', function (event) { return __awaiter(_this, void 0, void 0, function () {
-            var _a, _b, _c;
-            return __generator(this, function (_d) {
-                switch (_d.label) {
-                    case 0:
-                        _b = (_a = event.sender).send;
-                        _c = ['sparrow/raven-token'];
-                        return [4 /*yield*/, this.getValidAccessToken(false)];
+            var token;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.getValidAccessToken(false)];
                     case 1:
-                        _b.apply(_a, _c.concat([_d.sent()]));
+                        token = _a.sent();
+                        event.sender.send('sparrow/raven-token', token);
                         return [2 /*return*/];
                 }
             });
         }); });
         electron_1.ipcMain.on('sparrow/raven-token-prompt', function (event) { return __awaiter(_this, void 0, void 0, function () {
-            var _a, _b, _c;
-            return __generator(this, function (_d) {
-                switch (_d.label) {
-                    case 0:
-                        _b = (_a = event.sender).send;
-                        _c = ['sparrow/raven-token'];
-                        return [4 /*yield*/, this.getValidAccessToken(true)];
+            var token;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.getValidAccessToken(true)];
                     case 1:
-                        _b.apply(_a, _c.concat([_d.sent()]));
+                        token = _a.sent();
+                        event.sender.send('sparrow/raven-token', token);
                         return [2 /*return*/];
                 }
             });
@@ -132,6 +128,64 @@ var RavenLogin = /** @class */ (function () {
             _this.handleRedirect(url);
         });
     }
+    RavenLogin.prototype.getValidAccessToken = function (promptIfInvalid) {
+        return __awaiter(this, void 0, void 0, function () {
+            var tokens;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.getRavenTokens()];
+                    case 1:
+                        tokens = _a.sent();
+                        if (!promptIfInvalid) return [3 /*break*/, 4];
+                        if (!(tokens.decodedToken == undefined || Date.now() >= tokens.decodedToken.exp * 1000)) return [3 /*break*/, 4];
+                        if (tokens.decodedToken) {
+                            (0, main_1.logToDevtools)(tokens.decodedToken.exp * 1000);
+                            (0, main_1.logToDevtools)(Date.now());
+                        }
+                        return [4 /*yield*/, this.promptForRavenLogin()];
+                    case 2:
+                        _a.sent();
+                        return [4 /*yield*/, this.getRavenTokens()];
+                    case 3:
+                        tokens = _a.sent();
+                        _a.label = 4;
+                    case 4: return [2 /*return*/, tokens];
+                }
+            });
+        });
+    };
+    RavenLogin.prototype.getRavenTokens = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var accounts, key, decodedKey, parsedTokens, _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _b.trys.push([0, 2, , 3]);
+                        return [4 /*yield*/, keytar.findCredentials('Raven')];
+                    case 1:
+                        accounts = _b.sent();
+                        key = accounts[0].password;
+                        decodedKey = Buffer.from(key, 'base64').toString();
+                        parsedTokens = JSON.parse(decodedKey);
+                        return [2 /*return*/, {
+                                accessToken: parsedTokens.accessToken,
+                                refreshToken: parsedTokens.refreshToken,
+                                tokenType: parsedTokens.tokenType,
+                                decodedToken: (0, jwt_decode_1.default)(parsedTokens.accessToken)
+                            }];
+                    case 2:
+                        _a = _b.sent();
+                        return [2 /*return*/, {
+                                accessToken: undefined,
+                                refreshToken: undefined,
+                                tokenType: undefined,
+                                decodedToken: undefined
+                            }];
+                    case 3: return [2 /*return*/];
+                }
+            });
+        });
+    };
     RavenLogin.prototype.handleRedirect = function (url) {
         return __awaiter(this, void 0, void 0, function () {
             var tokens;
@@ -188,64 +242,6 @@ var RavenLogin = /** @class */ (function () {
             tokens: tokens,
             decodedToken: (0, jwt_decode_1.default)(tokens.accessToken)
         };
-    };
-    RavenLogin.prototype.getValidAccessToken = function (promptIfInvalid) {
-        return __awaiter(this, void 0, void 0, function () {
-            var tokens;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.getRavenTokens()];
-                    case 1:
-                        tokens = _a.sent();
-                        if (!promptIfInvalid) return [3 /*break*/, 4];
-                        if (!(tokens.decodedToken == undefined || Date.now() >= tokens.decodedToken.exp * 1000)) return [3 /*break*/, 4];
-                        if (tokens.decodedToken) {
-                            (0, main_1.logToDevtools)(tokens.decodedToken.exp * 1000);
-                            (0, main_1.logToDevtools)(Date.now());
-                        }
-                        return [4 /*yield*/, this.promptForRavenLogin()];
-                    case 2:
-                        _a.sent();
-                        return [4 /*yield*/, this.getRavenTokens()];
-                    case 3:
-                        tokens = _a.sent();
-                        _a.label = 4;
-                    case 4: return [2 /*return*/, tokens.accessToken];
-                }
-            });
-        });
-    };
-    RavenLogin.prototype.getRavenTokens = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var accounts, key, decodedKey, parsedTokens, _a;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0:
-                        _b.trys.push([0, 2, , 3]);
-                        return [4 /*yield*/, keytar.findCredentials('Raven')];
-                    case 1:
-                        accounts = _b.sent();
-                        key = accounts[0].password;
-                        decodedKey = Buffer.from(key, 'base64').toString();
-                        parsedTokens = JSON.parse(decodedKey);
-                        return [2 /*return*/, {
-                                accessToken: parsedTokens.accessToken,
-                                refreshToken: parsedTokens.refreshToken,
-                                tokenType: parsedTokens.tokenType,
-                                decodedToken: (0, jwt_decode_1.default)(parsedTokens.accessToken)
-                            }];
-                    case 2:
-                        _a = _b.sent();
-                        return [2 /*return*/, {
-                                accessToken: undefined,
-                                refreshToken: undefined,
-                                tokenType: undefined,
-                                decodedToken: undefined
-                            }];
-                    case 3: return [2 /*return*/];
-                }
-            });
-        });
     };
     return RavenLogin;
 }());

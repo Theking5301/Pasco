@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { IStaticData } from '../../../../app/services/static-data-access';
+import { IStaticData } from '../../../../app/services/static-data-access/static-data-access';
 import { SparrowElectronService } from '../sparrow-electron/sparrow-electron.service';
 
 @Injectable({

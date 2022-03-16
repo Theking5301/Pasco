@@ -48,6 +48,7 @@ export class SparrowContextMenuComponent implements OnInit {
   }
   public entryClicked(event, entry) {
     this.entryclicked.emit({ entry });
+    this.setOpen(false);
   }
   public getEntriesForCategory(category: string) {
     return this._entries.get(category);

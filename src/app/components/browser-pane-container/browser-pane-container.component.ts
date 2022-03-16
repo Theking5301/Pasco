@@ -26,7 +26,7 @@ export class BrowserPaneContainerComponent implements OnInit, AfterViewChecked {
   }
 
   public getInstances(): BrowserInstance[] {
-    return this.userService.getUserData().getTab(this.tabId).getInstances();
+    return this.userService.getBrowserData().getTab(this.tabId).getInstances();
   }
   public getInstanceById(instanceId: string): BrowserPaneComponent {
     for (const pane of this.panes.toArray()) {

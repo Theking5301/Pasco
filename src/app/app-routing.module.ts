@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { BrowserComponent } from './components/browser/browser.component';
-import { DetailRoutingModule } from './detail/detail-routing.module';
 
 
 const routes: Routes = [
@@ -13,8 +12,7 @@ const routes: Routes = [
 
 @NgModule({
   imports: [
-    RouterModule.forRoot(routes, { relativeLinkResolution: 'legacy' }),
-    DetailRoutingModule
+    RouterModule.forRoot(routes, { relativeLinkResolution: 'legacy' })
   ],
   exports: [RouterModule]
 })

@@ -1,7 +1,10 @@
-<div class='tab tab-on' [ngClass]="{'tab-active': active}" (mousedown)="mouseDown($event)" (click)="tabClicked($event)"
+<div class='tab' [ngClass]="{'tab-active': active}" (mousedown)="mouseDown($event)" (click)="tabClicked($event)"
   (auxclick)="tabAuxClicked($event)">
-  <img *ngIf="getTabIconUrl()" class='tab-icon' src="{{getTabIconUrl()}}" />
-  <span class='tab-title'>{{getTabName()}}</span>
+  <div class="tab-icon-container">
+    <img *ngIf="getTabIconUrl()" class='tab-icon' src="{{getTabIconUrl()}}" />
+  </div>
+
+  <div class='tab-title'>{{getTabName()}}</div>
   <button class="close-button" (click)="closeTab()">
     <img class="close-icon" src="assets/icons/close-tab.svg" alt="Close Tab" />
   </button>

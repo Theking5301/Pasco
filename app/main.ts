@@ -6,8 +6,10 @@ import * as path from 'path';
 import * as url from 'url';
 import { ServiceCollection } from './ServiceCollections';
 
-const ARGS = process.argv.slice(1);
 export let MAIN_WINDOW: BrowserWindow = null;
+
+const ARGS = process.argv.slice(1);
+export const APP_DIRECTORY = __dirname;
 export const IS_DEV = ARGS.some(val => val === '--serve');
 export const SERVICE_COLLECTION = new ServiceCollection(app, IS_DEV);
 
@@ -46,8 +48,7 @@ function createWindow(): BrowserWindow {
     MAIN_WINDOW.loadURL(url.format({
       pathname: 'localhost:4300',
       protocol: 'http:',
-      slashes: true,
-      query: { "dirname": __dirname }
+      slashes: true
     }));
   } else {
     // Path when running electron executable
@@ -61,8 +62,7 @@ function createWindow(): BrowserWindow {
     MAIN_WINDOW.loadURL(url.format({
       pathname: path.join(__dirname, pathIndex),
       protocol: 'file:',
-      slashes: true,
-      query: { "dirname": __dirname }
+      slashes: true
     }));
   }
 

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { BrowserTab } from '../../../../app/models/UserData';
 import { BrowserManagerService } from '../../services/browser-manager/browser-manager.service';
+import { StaticDataService } from '../../services/static-data-service/static-data-service.service';
 import { UserDataService } from '../../services/user-data-service/user-data-service.service';
 
 @Component({
@@ -10,14 +11,15 @@ import { UserDataService } from '../../services/user-data-service/user-data-serv
 })
 export class TabBarComponent implements OnInit {
   public selectedTabId: string;
+  public isMacOS: boolean;
 
-  constructor(private userService: UserDataService, private manager: BrowserManagerService) {
-
+  constructor(private userService: UserDataService, private staticData: StaticDataService, private manager: BrowserManagerService) {
+    this.isMacOS = staticData.getStaticData().platform === 'darwin';
   }
 
   ngOnInit(): void { }
   public getTabs(): BrowserTab[] {
-    return this.userService.getUserData().getTabs();
+    return this.userService.getBrowserData().getTabs();
   }
   public tabSelected(tabId: string): void {
     this.selectedTabId = tabId;
@@ -29,6 +31,6 @@ export class TabBarComponent implements OnInit {
   }
 
   public newTabClicked() {
-    this.manager.addTab('test');
+    this.manager.addTab('test', true);
   }
 }

@@ -1,8 +1,10 @@
 import { AfterViewInit, Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { BrowserManagerService } from '../../services/browser-manager/browser-manager.service';
-import { SparrowElectronService } from '../../services/sparrow-electron/sparrow-electron.service';
+import { StaticDataService } from './../../services/static-data-service/static-data-service.service';
 import { UserDataService } from './../../services/user-data-service/user-data-service.service';
 
+const TOP_OVERLAY_TRIGGER_HEIGHT = 32;
+const TOP_OVERLAY_FADE_OFF_TIME = 1500;
 
 @Component({
   selector: 'app-browser-pane',
@@ -28,18 +30,15 @@ export class BrowserPaneComponent implements OnInit, AfterViewInit {
   private topButtonFadeOffTimeout: NodeJS.Timeout;
 
 
-  constructor(private electron: SparrowElectronService, private userService: UserDataService, private manager: BrowserManagerService) {
+  constructor(private userService: UserDataService, private manager: BrowserManagerService, staticData: StaticDataService) {
     this.domLoaded = false;
     this.navigated = new EventEmitter();
-    const querystring = require('querystring');
-    const query = querystring.parse(global.location.search);
-    const sanitizedQuery = query['?dirname'].replaceAll('\\', '/');
-    this.preload = 'file://' + sanitizedQuery + '/preload.js';
+    this.preload = `file://${staticData.getStaticData().appDirectory}/preload.js`;
   }
 
   ngOnInit(): void {
-    this.url = this.userService.getUserData().getTab(this.tabId).getInstance(this.id).getUrl();
     this.manager.registerInstance(this);
+    this.url = this.userService.getBrowserData().getTab(this.tabId).getInstance(this.id).getUrl();
   }
   ngAfterViewInit(): void {
     this.webviewNative = this.webview.nativeElement;
@@ -58,19 +57,28 @@ export class BrowserPaneComponent implements OnInit, AfterViewInit {
             this.webContentsAuxClicked(message.args[0]);
           } else if (message.channel === 'contextmenu') {
             console.log(message.args);
+          } else if (message.channel === 'mousemove') {
+            this.webContentsMouseMove(message.args[0]);
           }
         });
+
+        this.webviewNative.addEventListener('new-window', (newWindowEvent) => {
+          if (newWindowEvent.disposition.indexOf('tab') >= 0) {
+            this.manager.addTab(newWindowEvent.frameName, newWindowEvent.disposition === 'foreground-tab', newWindowEvent.url);
+            newWindowEvent.preventDefault();
+          }
+        });
+
         // When loading for the first time, display the buttons so the user knows that they're there.
         this.topOverlayHovered = true;
         this.topButtonFadeOffTimeout = setTimeout(() => {
           this.topOverlayHovered = false;
-        }, 2000);
+        }, TOP_OVERLAY_FADE_OFF_TIME);
       }
 
 
       // If the page closed, close this instance too.
       this.webviewNative.addEventListener('close', () => {
-        console.log('close');
         this.manager.removeInstanceFromTab(this.tabId, this.id);
       });
 
@@ -106,11 +114,13 @@ export class BrowserPaneComponent implements OnInit, AfterViewInit {
     });
 
     this.webviewNative.addEventListener('page-title-updated', (e) => {
-      this.userService.getUserData().getTab(this.tabId).getInstance(this.id).setTitle(e.title);
+      this.userService.getBrowserData().getTab(this.tabId).getInstance(this.id).setTitle(e.title);
+      this.userService.syncToDataAccess();
     });
 
     this.webviewNative.addEventListener('page-favicon-updated', (e) => {
-      this.userService.getUserData().getTab(this.tabId).getInstance(this.id).setIcon(e.favicons[0]);
+      this.userService.getBrowserData().getTab(this.tabId).getInstance(this.id).setIcon(e.favicons[0]);
+      this.userService.syncToDataAccess();
     });
   }
   public navigate(url: string): void {
@@ -119,12 +129,8 @@ export class BrowserPaneComponent implements OnInit, AfterViewInit {
       return this.webviewNative.loadURL(url);
     }
   }
-
-  public mouseUp(e) {
-    console.log(e);
-  }
   public focused() {
-    return this.manager.getCurrentTabFocusedInstance().getId() === this.id;
+    return this.manager.getSelectedTabFocusedInstance().getId() === this.id;
   }
   public goBack() {
     if (this.domLoaded) {
@@ -145,7 +151,7 @@ export class BrowserPaneComponent implements OnInit, AfterViewInit {
     if (this.domLoaded) {
       return this.webviewNative.isLoading();
     }
-    return false;
+    return this.domLoaded;
   }
   public canGoForward(): boolean {
     if (this.domLoaded) {
@@ -176,7 +182,7 @@ export class BrowserPaneComponent implements OnInit, AfterViewInit {
     clearTimeout(this.topButtonFadeOffTimeout);
     this.topButtonFadeOffTimeout = setTimeout(() => {
       this.topOverlayHovered = false;
-    }, 2000);
+    }, TOP_OVERLAY_FADE_OFF_TIME);
   }
   public overlayTopMouseLeave() {
     this.topOverlayHovered = false;
@@ -187,6 +193,13 @@ export class BrowserPaneComponent implements OnInit, AfterViewInit {
   }
   public displayNewInstanceButton() {
     return this.topOverlayHovered;
+  }
+  private webContentsMouseMove(e) {
+    if (e.y <= TOP_OVERLAY_TRIGGER_HEIGHT) {
+      this.overlayTopMouseEnter();
+    } else {
+      this.overlayTopMouseLeave();
+    }
   }
   private webContentsMouseDown(e) {
     this.manager.setCurrentTabFocusedInstance(this.id);

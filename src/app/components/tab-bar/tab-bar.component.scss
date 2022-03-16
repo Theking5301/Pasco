@@ -1,9 +1,39 @@
 .tab-bar-container {
-  display      : flex;
-  align-content: stretch;
-  padding-left : 10px;
-  width        : min-content;
-  user-select            : none;
+  display     : flex;
+  padding-left: 6px;
+  user-select : none;
+}
+
+.tab-bar-container::-webkit-scrollbar {
+  height     : 0px;
+  width      : 0px;
+  /* Remove scrollbar space */
+  background : transparent;
+  /* Optional: just make scrollbar invisible */
+}
+
+/* Optional: show position indicator in red */
+.tab-bar-container::-webkit-scrollbar-thumb {
+  background: transparent;
+  height    : 0px;
+  width     : 0px;
+}
+
+.tab-bar-container-macos {
+  padding-left: 100px !important;
+}
+
+.tab-bar-container-other {
+  max-width: calc(100% - 110px);
+  overflow : scroll;
+}
+
+.tab-wrapper {
+  flex-grow : 1;
+  flex-basis: 0;
+  max-width : 240px;
+  min-width : 55px;
+  animation : tabOn 250ms both;
 }
 
 .new-tab-button {
@@ -24,3 +54,18 @@
 }
 
 .new-tab-icon:hover {}
+
+.spacer {
+  flex-grow: 1;
+}
+
+@keyframes tabOn {
+
+  0% {
+    max-width: 0px;
+  }
+
+  100% {
+    max-width: 240px;
+  }
+}

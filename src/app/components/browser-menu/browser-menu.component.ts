@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/member-ordering */
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { IMenuEntry, SparrowContextMenuComponent } from '../sparrow-context-menu/sparrow-context-menu.component';
+import { Component, EventEmitter, OnInit, Output, ViewChild } from '@angular/core';
+import { IMenuEntry, IMenuEntryEvent, SparrowContextMenuComponent } from '../sparrow-context-menu/sparrow-context-menu.component';
 
 @Component({
   selector: 'app-browser-menu',
@@ -8,11 +8,18 @@ import { IMenuEntry, SparrowContextMenuComponent } from '../sparrow-context-menu
   styleUrls: ['./browser-menu.component.scss']
 })
 export class BrowserMenuComponent implements OnInit {
+  @Output()
+  public entryclicked: EventEmitter<IMenuEntryEvent>;
+
   public entries: Map<string, IMenuEntry[]>;
   @ViewChild(SparrowContextMenuComponent)
   private menu: SparrowContextMenuComponent;
 
   constructor() {
+    this.entryclicked = new EventEmitter();
+
+
+
     this.entries = new Map<string, IMenuEntry[]>();
     this.addEntry({ category: 'browser-functions', name: 'browser.menu.new_tab', action: 'new_tab' });
     this.addEntry({ category: 'browser-functions', name: 'browser.menu.close_tab', action: 'close_tab' });

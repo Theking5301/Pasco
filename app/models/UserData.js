@@ -1,11 +1,35 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.BrowserInstance = exports.BrowserTab = exports.UserData = void 0;
+exports.BrowserInstance = exports.BrowserTab = exports.BrowserState = exports.UserData = void 0;
 var uuid_1 = require("uuid");
 var UserData = /** @class */ (function () {
     function UserData(json) {
         if (json) {
             this.version = json.version;
+            this.ravenId = json.ravenId;
+            this.browsers = [];
+            for (var _i = 0, _a = json.browsers; _i < _a.length; _i++) {
+                var t = _a[_i];
+                this.browsers.push(new BrowserState(t));
+            }
+        }
+    }
+    UserData.prototype.getBrowser = function (id) {
+        for (var _i = 0, _a = this.browsers; _i < _a.length; _i++) {
+            var browser = _a[_i];
+            if (browser.getId() === id) {
+                return browser;
+            }
+        }
+        return undefined;
+    };
+    return UserData;
+}());
+exports.UserData = UserData;
+var BrowserState = /** @class */ (function () {
+    function BrowserState(json) {
+        if (json) {
+            this.id = json.id;
             this.tabs = [];
             for (var _i = 0, _a = json.tabs; _i < _a.length; _i++) {
                 var t = _a[_i];
@@ -13,7 +37,10 @@ var UserData = /** @class */ (function () {
             }
         }
     }
-    UserData.prototype.getTab = function (id) {
+    BrowserState.prototype.getId = function () {
+        return this.id;
+    };
+    BrowserState.prototype.getTab = function (id) {
         for (var _i = 0, _a = this.tabs; _i < _a.length; _i++) {
             var tab = _a[_i];
             if (tab.getId() === id) {
@@ -22,27 +49,27 @@ var UserData = /** @class */ (function () {
         }
         return undefined;
     };
-    UserData.prototype.getTabs = function () {
+    BrowserState.prototype.getTabs = function () {
         return this.tabs;
     };
-    UserData.prototype.addTab = function (name) {
+    BrowserState.prototype.addTab = function (name, url) {
         var tab = new BrowserTab({
             name: name,
             id: (0, uuid_1.v4)(),
             instances: [
-                new BrowserInstance({ id: (0, uuid_1.v4)(), url: 'https://www.google.com' })
+                new BrowserInstance({ id: (0, uuid_1.v4)(), url: url ? url : 'https://www.google.com' })
             ]
         });
         this.tabs.push(tab);
         return tab;
     };
-    UserData.prototype.removeTab = function (tabId) {
+    BrowserState.prototype.removeTab = function (tabId) {
         var index = this.getTabIndex(tabId);
         if (index >= 0) {
             this.tabs.splice(index, 1);
         }
     };
-    UserData.prototype.getTabIndex = function (tabId) {
+    BrowserState.prototype.getTabIndex = function (tabId) {
         var index = -1;
         for (var i = 0; i < this.tabs.length; i++) {
             if (this.tabs[i].getId() === tabId) {
@@ -52,14 +79,13 @@ var UserData = /** @class */ (function () {
         }
         return index;
     };
-    return UserData;
+    return BrowserState;
 }());
-exports.UserData = UserData;
+exports.BrowserState = BrowserState;
 var BrowserTab = /** @class */ (function () {
     function BrowserTab(json) {
         if (json) {
             this.id = json.id;
-            this.name = json.name;
             this.instances = [];
             for (var _i = 0, _a = json.instances; _i < _a.length; _i++) {
                 var t = _a[_i];
@@ -69,12 +95,6 @@ var BrowserTab = /** @class */ (function () {
     }
     BrowserTab.prototype.getId = function () {
         return this.id;
-    };
-    BrowserTab.prototype.getName = function () {
-        return this.name;
-    };
-    BrowserTab.prototype.setName = function (name) {
-        this.name = name;
     };
     BrowserTab.prototype.getInstance = function (id) {
         for (var _i = 0, _a = this.instances; _i < _a.length; _i++) {
@@ -123,6 +143,8 @@ var BrowserInstance = /** @class */ (function () {
         if (json) {
             this.id = json.id;
             this.url = json.url;
+            this.title = json.title;
+            this.icon = json.icon;
         }
     }
     BrowserInstance.prototype.getId = function () {

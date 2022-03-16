@@ -16,12 +16,12 @@ export class NavigationBarComponent implements OnInit {
   public refreshIcon: string;
 
   constructor(private manager: BrowserManagerService, private electron: SparrowElectronService) {
-    this.url = this.manager.getCurrentTabFocusedInstance().getUrl();
+    this.url = this.manager.getSelectedTabFocusedInstance().getUrl();
     this.manager.focusedPaneChanged.subscribe((pane) => {
-      this.url = this.manager.getCurrentTabFocusedInstance().getUrl();
+      this.url = this.manager.getSelectedTabFocusedInstance().getUrl();
     });
     this.manager.anyInstanceNavigated.subscribe((e) => {
-      if (e.instanceId === this.manager.getCurrentTabFocusedInstance().getId()) {
+      if (e.instanceId === this.manager.getSelectedTabFocusedInstance().getId()) {
         this.url = e.url;
       }
     });
@@ -30,10 +30,10 @@ export class NavigationBarComponent implements OnInit {
   ngOnInit(): void {
   }
   public getUrl() {
-    return this.manager.getCurrentTabFocusedInstance().getUrl();
+    return this.manager.getSelectedTabFocusedInstance().getUrl();
   }
   public urlSubmitted(e) {
-    if (this.manager.getCurrentTabFocusedInstance() !== undefined) {
+    if (this.manager.getSelectedTabFocusedInstance() !== undefined) {
       this.url = this.formatUrl(this.url);
       this.manager.navigateFocusedInstance(this.url);
     }
@@ -80,11 +80,15 @@ export class NavigationBarComponent implements OnInit {
   }
   public menuEntryClicked(event: IMenuEntryEvent) {
     switch (event.entry.action) {
-      case 'new_tab': this.manager.addTab('New Tab');
+      case 'new_tab': this.manager.addTab('New Tab', true);
         break;
       case 'close_tab': this.manager.removeTab(this.manager.getSelectedTab().getId());
         break;
-      case 'new_instance': this.manager.addInstanceToTab(this.manager.getSelectedTab().getId(), 'https://www.google.com');
+      case 'new_instance': this.manager.addInstanceToTabAfterInstance(
+        this.manager.getSelectedTab().getId(),
+        this.manager.getSelectedTabFocusedInstance().getId(),
+        'https://www.google.com'
+      );
         break;
       case 'close_instance': this.manager.removeInstanceFromTab(
         this.manager.getSelectedTab().getId(),
@@ -95,18 +99,12 @@ export class NavigationBarComponent implements OnInit {
   }
   public openProfileMenu() {
     this.electron.ipcRenderer.send('sparrow/open-raven-login');
-    // this.openRavenLogin('http://localhost:4200/', 475, 675);
   }
-
-  private openRavenLogin(url: string, w: number, h: number) {
-    const y = window.outerHeight / 2 + window.screenY - (h / 2);
-    const x = window.outerWidth / 2 + window.screenX - (w / 2);
-    const popup = window.open(url, 'popup', 'toolbar=no, location=no, directories=no, status=no, copyhistory=no, width='
-      + w + ', height=' + h + ', top=' + y + ', left=' + x);
-
-    window.addEventListener('message', (event) => {
-      console.log(event);
-      this.electron.ipcRenderer.send('sparrow/open-raven-login', event.data);
-    }, false);
+  private updateIcons() {
+    if (this.isReloading()) {
+      this.refreshIcon = 'url(assets/icons/stop-refresh.svg) no-repeat center';
+    } else {
+      this.refreshIcon = 'url(assets/icons/refresh.svg) no-repeat center';
+    }
   }
 }
