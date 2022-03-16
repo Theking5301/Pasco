@@ -1,7 +1,7 @@
 import { v4 as uuid } from 'uuid';
 
 export class UserData {
-  public version: number;
+  public version: string;
   public ravenId: string;
   public profile: string;
   public lastModified: number;
@@ -11,10 +11,15 @@ export class UserData {
     if (json) {
       this.version = json.version;
       this.ravenId = json.ravenId;
+      this.lastModified = json.lastModified;
       this.browsers = [];
       for (const t of json.browsers) {
         this.browsers.push(new BrowserState(t));
       }
+    }
+
+    if (!this.lastModified) {
+      this.lastModified = Date.now();
     }
   }
 
@@ -24,7 +29,7 @@ export class UserData {
         return browser;
       }
     }
-    return undefined;
+    return this.browsers[0];
   }
 }
 export class BrowserState {

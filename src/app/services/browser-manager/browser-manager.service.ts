@@ -38,6 +38,7 @@ export class BrowserManagerService {
   public registerInstance(pane: BrowserPaneComponent) {
     this.panes.set(pane.id, pane);
     pane.navigated.subscribe((e) => {
+      console.log(`Instance: ${e.instanceId} navigated to: ${e.url}`);
       this.userService.getBrowserData().getTab(e.tabId)?.getInstance(e.instanceId)?.setUrl(e.url);
       this.userService.syncToDataAccess();
       this.anyInstanceNavigated.emit({
@@ -84,6 +85,7 @@ export class BrowserManagerService {
       this.setFocusedInstance(newTab.getId(), newTab.getInstances()[0].getId());
     }
     this.userService.syncToDataAccess();
+    console.log(`Added a new tab with id: ${newTab.getId()}`);
     return newTab;
   }
   public removeTab(tabId: string) {
@@ -98,6 +100,7 @@ export class BrowserManagerService {
       }
     }
 
+    console.log(`Removed a new tab with id: ${tabId}`);
     this.userService.syncToDataAccess();
   }
   public addInstanceToTab(tabId: string, url: string): BrowserInstance {
@@ -111,6 +114,7 @@ export class BrowserManagerService {
     const existingInstance = tab.getInstance(instanceId);
     const inst = tab.addInstanceAfterIndex(existingIndex + 1, url ? url : existingInstance.getUrl());
     this.userService.syncToDataAccess();
+    console.log(`Added a new tab with id: ${tabId}`);
     return inst;
   }
   public removeInstanceFromTab(tabId: string, instanceId: string) {
@@ -134,6 +138,7 @@ export class BrowserManagerService {
       this.setFocusedInstance(tab.getId(), inst.getId());
     }
 
+    console.log(`Removed an instance from tab: ${tabId} with instanceId: ${instanceId}`);
     this.userService.syncToDataAccess();
   }
   public navigateFocusedInstance(url: string) {

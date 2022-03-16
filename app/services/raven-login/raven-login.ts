@@ -119,6 +119,9 @@ export class RavenLogin {
       };
     }
   }
+  public async shouldPerformCloudOperations(): Promise<boolean> {
+    return (await this.getRavenTokens()).accessToken !== undefined;
+  }
   private async handleRedirect(url: string): Promise<void> {
     const tokens = this.stripTokensFromRedirect(url);
     await keytar.setPassword('Raven', tokens.decodedToken.ravenId, tokens.rawResponse);

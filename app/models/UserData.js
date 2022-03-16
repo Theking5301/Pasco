@@ -7,11 +7,15 @@ var UserData = /** @class */ (function () {
         if (json) {
             this.version = json.version;
             this.ravenId = json.ravenId;
+            this.lastModified = json.lastModified;
             this.browsers = [];
             for (var _i = 0, _a = json.browsers; _i < _a.length; _i++) {
                 var t = _a[_i];
                 this.browsers.push(new BrowserState(t));
             }
+        }
+        if (!this.lastModified) {
+            this.lastModified = Date.now();
         }
     }
     UserData.prototype.getBrowser = function (id) {
@@ -21,7 +25,7 @@ var UserData = /** @class */ (function () {
                 return browser;
             }
         }
-        return undefined;
+        return this.browsers[0];
     };
     return UserData;
 }());

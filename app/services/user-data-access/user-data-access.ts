@@ -29,26 +29,31 @@ export class UserDataAccess {
       if (cloudProfile && localProfile) {
         if (cloudProfile.lastModified > localProfile.lastModified) {
           output = cloudProfile;
+          console.log('Loaded profile from the cloud.');
         } else {
           output = localProfile;
+          console.log('Loaded profile from local copy.');
         }
       } else if (cloudProfile) {
         output = cloudProfile;
+        console.log('Loaded profile from the cloud.');
       } else if (localProfile) {
         output = localProfile;
+        console.log('Loaded profile from local copy.');
       } else {
-        output = this.createDefaultUserData();
+        output = await this.createDefaultUserData();
+        console.log('Initializing first time profile.');
       }
 
       event.sender.send('sparrow/user-data', output);
     });
   }
-  public async syncProfileFromCloud(): Promise<UserData> {
-    const tokens = await ServiceCollection.RAVEN.getValidAccessToken(true);
-    if (!tokens || !tokens.accessToken) {
-      return;
+  private async syncProfileFromCloud(): Promise<UserData> {
+    if (!(await ServiceCollection.RAVEN.shouldPerformCloudOperations())) {
+      return undefined;
     }
 
+    const tokens = await ServiceCollection.RAVEN.getValidAccessToken(true);
     try {
       const response = await axios.default.post<any>('http://localhost:8090/api/v1',
         {
@@ -56,6 +61,7 @@ export class UserDataAccess {
             `query {
           profile(ravenId: "${tokens.decodedToken.ravenId}") {
             ravenId
+            version
             browsers {
               id
               tabs {
@@ -63,6 +69,8 @@ export class UserDataAccess {
                 instances {
                   url
                   id
+                  title
+                  icon
                 }
               }
             }
@@ -76,14 +84,18 @@ export class UserDataAccess {
         }
       );
 
-      return new UserData(response.data.data.profile);
+      if (response.data.data.profile) {
+        console.log(`Synced User Data from the cloud: ${response.data.data.profile}`);
+        return new UserData(response.data.data.profile);
+      } else {
+        return undefined;
+      }
     } catch (err) {
       throw new Error(`"An error occurred when syncing profile data from the cloud. Error: ${err}`);
     }
   }
-
   private async syncDataToCloud(data: UserData): Promise<void> {
-    if (!data.ravenId) {
+    if (!(await ServiceCollection.RAVEN.shouldPerformCloudOperations())) {
       return;
     }
 
@@ -94,6 +106,8 @@ export class UserDataAccess {
           query:
             `mutation($profile: SparrowProfileInput!){
             updateProfile(profile: $profile) {
+              ravenId
+              version
               browsers {
                 id
                 tabs {
@@ -101,10 +115,11 @@ export class UserDataAccess {
                   instances {
                     id
                     url
+                    title
+                    icon
                   }
                 }
               }
-              ravenId
             }
           }`,
           variables: {
@@ -117,6 +132,7 @@ export class UserDataAccess {
           }
         }
       );
+      console.log(`Synced User Data to the cloud: ${data}`);
     } catch (err) {
       throw new Error(`"An error occurred when syncing profile data to the cloud. Error: ${err}`);
     }
@@ -133,21 +149,23 @@ export class UserDataAccess {
       const user = await ServiceCollection.RAVEN.getRavenTokens();
       const data = await ServiceCollection.DB.query('SELECT UserData from tbl_UserData where RavenId=$RavenId', { $RavenId: user.decodedToken.ravenId });
       if (data) {
+        console.log(`Read profile: ${JSON.stringify(data)} from the database.`);
         return new UserData(JSON.parse(data.userData));
       }
     } catch (error) {
       console.error(error);
     }
-
-    // If we made it this far due to error, return an empty UserData.
-    return new UserData();
+    return undefined;
   }
-  private createDefaultUserData(): UserData {
+  private async createDefaultUserData(): Promise<UserData> {
+    const tokens = await ServiceCollection.RAVEN.getRavenTokens();
+    const ravenId = tokens?.decodedToken?.ravenId ? tokens.decodedToken.ravenId : 'LOCAL';
     return new UserData({
-      version: 1,
+      version: '1',
+      ravenId: ravenId,
       browsers: [
         {
-          id: '',
+          id: uuidv4(),
           tabs: [
             new BrowserTab({
               name: 'DefaultTab',

@@ -89,23 +89,32 @@ var UserDataAccess = /** @class */ (function () {
                         return [3 /*break*/, 7];
                     case 7:
                         output = undefined;
-                        if (cloudProfile && localProfile) {
-                            if (cloudProfile.lastModified > localProfile.lastModified) {
-                                output = cloudProfile;
-                            }
-                            else {
-                                output = localProfile;
-                            }
-                        }
-                        else if (cloudProfile) {
+                        if (!(cloudProfile && localProfile)) return [3 /*break*/, 8];
+                        if (cloudProfile.lastModified > localProfile.lastModified) {
                             output = cloudProfile;
-                        }
-                        else if (localProfile) {
-                            output = localProfile;
+                            console.log('Loaded profile from the cloud.');
                         }
                         else {
-                            output = this.createDefaultUserData();
+                            output = localProfile;
+                            console.log('Loaded profile from local copy.');
                         }
+                        return [3 /*break*/, 12];
+                    case 8:
+                        if (!cloudProfile) return [3 /*break*/, 9];
+                        output = cloudProfile;
+                        console.log('Loaded profile from the cloud.');
+                        return [3 /*break*/, 12];
+                    case 9:
+                        if (!localProfile) return [3 /*break*/, 10];
+                        output = localProfile;
+                        console.log('Loaded profile from local copy.');
+                        return [3 /*break*/, 12];
+                    case 10: return [4 /*yield*/, this.createDefaultUserData()];
+                    case 11:
+                        output = _c.sent();
+                        console.log('Initializing first time profile.');
+                        _c.label = 12;
+                    case 12:
                         event.sender.send('sparrow/user-data', output);
                         return [2 /*return*/];
                 }
@@ -117,29 +126,38 @@ var UserDataAccess = /** @class */ (function () {
             var tokens, response, err_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, ServiceCollections_1.ServiceCollection.RAVEN.getValidAccessToken(true)];
+                    case 0: return [4 /*yield*/, ServiceCollections_1.ServiceCollection.RAVEN.shouldPerformCloudOperations()];
                     case 1:
-                        tokens = _a.sent();
-                        if (!tokens || !tokens.accessToken) {
-                            return [2 /*return*/];
+                        if (!(_a.sent())) {
+                            return [2 /*return*/, undefined];
                         }
-                        _a.label = 2;
+                        return [4 /*yield*/, ServiceCollections_1.ServiceCollection.RAVEN.getValidAccessToken(true)];
                     case 2:
-                        _a.trys.push([2, 4, , 5]);
+                        tokens = _a.sent();
+                        _a.label = 3;
+                    case 3:
+                        _a.trys.push([3, 5, , 6]);
                         return [4 /*yield*/, axios.default.post('http://localhost:8090/api/v1', {
-                                query: "query {\n          profile(ravenId: \"".concat(tokens.decodedToken.ravenId, "\") {\n            ravenId\n            browsers {\n              id\n              tabs {\n                id\n                instances {\n                  url\n                  id\n                }\n              }\n            }\n          }\n        } ")
+                                query: "query {\n          profile(ravenId: \"".concat(tokens.decodedToken.ravenId, "\") {\n            ravenId\n            version\n            browsers {\n              id\n              tabs {\n                id\n                instances {\n                  url\n                  id\n                  title\n                  icon\n                }\n              }\n            }\n          }\n        } ")
                             }, {
                                 headers: {
                                     authorization: "Bearer ".concat(tokens.accessToken)
                                 }
                             })];
-                    case 3:
-                        response = _a.sent();
-                        return [2 /*return*/, new UserData_1.UserData(response.data.data.profile)];
                     case 4:
+                        response = _a.sent();
+                        if (response.data.data.profile) {
+                            console.log("Synced User Data from the cloud: ".concat(response.data.data.profile));
+                            return [2 /*return*/, new UserData_1.UserData(response.data.data.profile)];
+                        }
+                        else {
+                            return [2 /*return*/, undefined];
+                        }
+                        return [3 /*break*/, 6];
+                    case 5:
                         err_1 = _a.sent();
                         throw new Error("\"An error occurred when syncing profile data from the cloud. Error: ".concat(err_1));
-                    case 5: return [2 /*return*/];
+                    case 6: return [2 /*return*/];
                 }
             });
         });
@@ -149,18 +167,19 @@ var UserDataAccess = /** @class */ (function () {
             var tokens, err_2;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        if (!data.ravenId) {
+                    case 0: return [4 /*yield*/, ServiceCollections_1.ServiceCollection.RAVEN.shouldPerformCloudOperations()];
+                    case 1:
+                        if (!(_a.sent())) {
                             return [2 /*return*/];
                         }
                         return [4 /*yield*/, ServiceCollections_1.ServiceCollection.RAVEN.getValidAccessToken(true)];
-                    case 1:
-                        tokens = _a.sent();
-                        _a.label = 2;
                     case 2:
-                        _a.trys.push([2, 4, , 5]);
+                        tokens = _a.sent();
+                        _a.label = 3;
+                    case 3:
+                        _a.trys.push([3, 5, , 6]);
                         return [4 /*yield*/, axios.default.post('http://localhost:8090/api/v1', {
-                                query: "mutation($profile: SparrowProfileInput!){\n            updateProfile(profile: $profile) {\n              browsers {\n                id\n                tabs {\n                  id\n                  instances {\n                    id\n                    url\n                  }\n                }\n              }\n              ravenId\n            }\n          }",
+                                query: "mutation($profile: SparrowProfileInput!){\n            updateProfile(profile: $profile) {\n              ravenId\n              version\n              browsers {\n                id\n                tabs {\n                  id\n                  instances {\n                    id\n                    url\n                    title\n                    icon\n                  }\n                }\n              }\n            }\n          }",
                                 variables: {
                                     profile: data
                                 }
@@ -169,13 +188,14 @@ var UserDataAccess = /** @class */ (function () {
                                     authorization: "Bearer ".concat(tokens.accessToken)
                                 }
                             })];
-                    case 3:
-                        _a.sent();
-                        return [3 /*break*/, 5];
                     case 4:
+                        _a.sent();
+                        console.log("Synced User Data to the cloud: ".concat(data));
+                        return [3 /*break*/, 6];
+                    case 5:
                         err_2 = _a.sent();
                         throw new Error("\"An error occurred when syncing profile data to the cloud. Error: ".concat(err_2));
-                    case 5: return [2 /*return*/];
+                    case 6: return [2 /*return*/];
                 }
             });
         });
@@ -209,6 +229,7 @@ var UserDataAccess = /** @class */ (function () {
                     case 2:
                         data = _a.sent();
                         if (data) {
+                            console.log("Read profile: ".concat(JSON.stringify(data), " from the database."));
                             return [2 /*return*/, new UserData_1.UserData(JSON.parse(data.userData))];
                         }
                         return [3 /*break*/, 4];
@@ -216,33 +237,44 @@ var UserDataAccess = /** @class */ (function () {
                         error_1 = _a.sent();
                         console.error(error_1);
                         return [3 /*break*/, 4];
-                    case 4: 
-                    // If we made it this far due to error, return an empty UserData.
-                    return [2 /*return*/, new UserData_1.UserData()];
+                    case 4: return [2 /*return*/, undefined];
                 }
             });
         });
     };
     UserDataAccess.prototype.createDefaultUserData = function () {
-        return new UserData_1.UserData({
-            version: 1,
-            browsers: [
-                {
-                    id: '',
-                    tabs: [
-                        new UserData_1.BrowserTab({
-                            name: 'DefaultTab',
-                            id: (0, uuid_1.v4)(),
-                            instances: [
-                                new UserData_1.BrowserInstance({
-                                    id: (0, uuid_1.v4)(),
-                                    url: 'https://www.google.com'
-                                })
-                            ]
-                        })
-                    ]
+        var _a;
+        return __awaiter(this, void 0, void 0, function () {
+            var tokens, ravenId;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0: return [4 /*yield*/, ServiceCollections_1.ServiceCollection.RAVEN.getRavenTokens()];
+                    case 1:
+                        tokens = _b.sent();
+                        ravenId = ((_a = tokens === null || tokens === void 0 ? void 0 : tokens.decodedToken) === null || _a === void 0 ? void 0 : _a.ravenId) ? tokens.decodedToken.ravenId : 'LOCAL';
+                        return [2 /*return*/, new UserData_1.UserData({
+                                version: '1',
+                                ravenId: ravenId,
+                                browsers: [
+                                    {
+                                        id: (0, uuid_1.v4)(),
+                                        tabs: [
+                                            new UserData_1.BrowserTab({
+                                                name: 'DefaultTab',
+                                                id: (0, uuid_1.v4)(),
+                                                instances: [
+                                                    new UserData_1.BrowserInstance({
+                                                        id: (0, uuid_1.v4)(),
+                                                        url: 'https://www.google.com'
+                                                    })
+                                                ]
+                                            })
+                                        ]
+                                    }
+                                ]
+                            })];
                 }
-            ]
+            });
         });
     };
     return UserDataAccess;
