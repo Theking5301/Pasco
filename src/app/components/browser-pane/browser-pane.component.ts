@@ -1,4 +1,5 @@
 import { AfterViewInit, Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
+import { Logger } from '../../../../app/utilities/Logger';
 import { BrowserManagerService } from '../../services/browser-manager/browser-manager.service';
 import { StaticDataService } from './../../services/static-data-service/static-data-service.service';
 import { UserDataService } from './../../services/user-data-service/user-data-service.service';
@@ -56,7 +57,7 @@ export class BrowserPaneComponent implements OnInit, AfterViewInit {
           } else if (message.channel === 'auxclick') {
             this.webContentsAuxClicked(message.args[0]);
           } else if (message.channel === 'contextmenu') {
-            console.log(message.args);
+            Logger.info(message.args);
           } else if (message.channel === 'mousemove') {
             this.webContentsMouseMove(message.args[0]);
           }
@@ -113,14 +114,17 @@ export class BrowserPaneComponent implements OnInit, AfterViewInit {
       });
     });
 
+    this.webviewNative.addEventListener('did-frame-navigate', (e) => {
+
+    });
+
+
     this.webviewNative.addEventListener('page-title-updated', (e) => {
       this.userService.getBrowserData().getTab(this.tabId).getInstance(this.id).setTitle(e.title);
-      this.userService.syncToDataAccess();
     });
 
     this.webviewNative.addEventListener('page-favicon-updated', (e) => {
       this.userService.getBrowserData().getTab(this.tabId).getInstance(this.id).setIcon(e.favicons[0]);
-      this.userService.syncToDataAccess();
     });
   }
   public navigate(url: string): void {

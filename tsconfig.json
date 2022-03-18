@@ -10,18 +10,8 @@
     "experimentalDecorators": true,
     "allowJs": true,
     "target": "es2018",
-    "baseUrl": ".",
     "typeRoots": ["node_modules/@types"],
-    "lib": ["es2018", "es2017", "es2016", "es2015", "dom"],
-    "paths": {
-      "@main/*": ["app/*"],
-      "@main-services/*": ["app/services/*"],
-      "@main-models/*": ["app/models/*"],
-      "@components/*": ["src/app/components/*"],
-      "@services/*": ["src/app/services/*"],
-      "@directives/*": ["src/app/directives/*"],
-      "@utils/*": ["src/app/utils/*"]
-    }
+    "lib": ["es2020", "es2018", "es2017", "es2016", "es2015", "dom"]
   },
   "exclude": ["node_modules"],
   "angularCompilerOptions": {

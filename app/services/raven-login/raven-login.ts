@@ -3,16 +3,18 @@ import jwt_decode, { JwtPayload } from "jwt-decode";
 import * as keytar from 'keytar';
 import * as path from 'path';
 import { logToDevtools, MAIN_WINDOW } from '../../main';
+import { BaseService } from '../BaseService';
 
 const RAVEN_WINDOW_WIDTH = 475;
 const RAVEN_WINDOW_HEIGHT = 700;
 
-export class RavenLogin {
+export class RavenLogin extends BaseService {
   private ravenWindow: BrowserWindow;
   private protocol: string;
   private protocolLaunchArg: string = "--protocol-launch";
 
   public constructor(private app: App, isDev: boolean) {
+    super();
     // Set the protocol covered by this instance of the app.
     // On MacOS this is meaningless as the plist controls this.
     this.protocol = 'sd-sparrow';
@@ -81,6 +83,9 @@ export class RavenLogin {
     app.on('open-url', (event, url) => {
       this.handleRedirect(url);
     });
+  }
+  public initialize(): Promise<void> {
+    return Promise.resolve();
   }
   public async getValidAccessToken(promptIfInvalid: boolean): Promise<IRavenTokens> {
     let tokens = await this.getRavenTokens();
@@ -151,7 +156,7 @@ export class RavenLogin {
     const responseType = 'token';
     const redirectUri = `sd-sparrow://login`;
     const scope = 'sparrow';
-    this.ravenWindow.loadURL(`http://localhost:4200/login?scope=${scope}&response_type=${responseType}&redirect_uri=${redirectUri}&client_id=${clientId}`);
+    this.ravenWindow.loadURL(`http:/www.raven.suburbandigital.com/auth/login?scope=${scope}&response_type=${responseType}&redirect_uri=${redirectUri}&client_id=${clientId}`);
 
     // Return a promise that will resolve when the popup is closed.
     return new Promise<void>((resolve) => {

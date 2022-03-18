@@ -43,7 +43,6 @@
     "@angular/platform-browser-dynamic": "13.2.4",
     "@angular/router": "13.2.4",
     "electron-deeplink": "1.0.9",
-    "module-alias": "2.2.2",
     "rxjs": "7.5.0",
     "tslib": "^2.1.0",
     "update-electron-app": "2.0.1",
@@ -94,7 +93,5 @@
   "engines": {
     "node": ">=14.0.0"
   },
-  "browserslist": [
-    "chrome 98"
-  ]
+  "browserslist": "chrome 98"
 }

@@ -3,7 +3,6 @@ import { BrowserManagerService } from '../../services/browser-manager/browser-ma
 import { SparrowElectronService } from '../../services/sparrow-electron/sparrow-electron.service';
 import { IMenuEntryEvent } from '../sparrow-context-menu/sparrow-context-menu.component';
 import { BrowserMenuComponent } from './../browser-menu/browser-menu.component';
-
 @Component({
   selector: 'app-navigation-bar',
   templateUrl: './navigation-bar.component.html',
@@ -20,10 +19,10 @@ export class NavigationBarComponent implements OnInit {
     this.manager.focusedPaneChanged.subscribe((pane) => {
       this.url = this.manager.getSelectedTabFocusedInstance().getUrl();
     });
-    this.manager.anyInstanceNavigated.subscribe((e) => {
+    this.manager.anyInstanceNavigated.subscribe(async (e) => {
       if (e.instanceId === this.manager.getSelectedTabFocusedInstance().getId()) {
         this.url = e.url;
-      }
+      };
     });
   }
 

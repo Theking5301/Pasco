@@ -1,16 +1,15 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BrowserInstance = exports.BrowserTab = exports.BrowserState = exports.UserData = void 0;
-var uuid_1 = require("uuid");
-var UserData = /** @class */ (function () {
-    function UserData(json) {
+const uuid_1 = require("uuid");
+class UserData {
+    constructor(json) {
         if (json) {
             this.version = json.version;
             this.ravenId = json.ravenId;
             this.lastModified = json.lastModified;
             this.browsers = [];
-            for (var _i = 0, _a = json.browsers; _i < _a.length; _i++) {
-                var t = _a[_i];
+            for (const t of json.browsers) {
                 this.browsers.push(new BrowserState(t));
             }
         }
@@ -18,47 +17,43 @@ var UserData = /** @class */ (function () {
             this.lastModified = Date.now();
         }
     }
-    UserData.prototype.getBrowser = function (id) {
-        for (var _i = 0, _a = this.browsers; _i < _a.length; _i++) {
-            var browser = _a[_i];
+    getBrowser(id) {
+        for (const browser of this.browsers) {
             if (browser.getId() === id) {
                 return browser;
             }
         }
         return this.browsers[0];
-    };
-    return UserData;
-}());
+    }
+}
 exports.UserData = UserData;
-var BrowserState = /** @class */ (function () {
-    function BrowserState(json) {
+class BrowserState {
+    constructor(json) {
         if (json) {
             this.id = json.id;
             this.tabs = [];
-            for (var _i = 0, _a = json.tabs; _i < _a.length; _i++) {
-                var t = _a[_i];
+            for (const t of json.tabs) {
                 this.tabs.push(new BrowserTab(t));
             }
         }
     }
-    BrowserState.prototype.getId = function () {
+    getId() {
         return this.id;
-    };
-    BrowserState.prototype.getTab = function (id) {
-        for (var _i = 0, _a = this.tabs; _i < _a.length; _i++) {
-            var tab = _a[_i];
+    }
+    getTab(id) {
+        for (const tab of this.tabs) {
             if (tab.getId() === id) {
                 return tab;
             }
         }
         return undefined;
-    };
-    BrowserState.prototype.getTabs = function () {
+    }
+    getTabs() {
         return this.tabs;
-    };
-    BrowserState.prototype.addTab = function (name, url) {
-        var tab = new BrowserTab({
-            name: name,
+    }
+    addTab(name, url) {
+        const tab = new BrowserTab({
+            name,
             id: (0, uuid_1.v4)(),
             instances: [
                 new BrowserInstance({ id: (0, uuid_1.v4)(), url: url ? url : 'https://www.google.com' })
@@ -66,84 +61,79 @@ var BrowserState = /** @class */ (function () {
         });
         this.tabs.push(tab);
         return tab;
-    };
-    BrowserState.prototype.removeTab = function (tabId) {
-        var index = this.getTabIndex(tabId);
+    }
+    removeTab(tabId) {
+        const index = this.getTabIndex(tabId);
         if (index >= 0) {
             this.tabs.splice(index, 1);
         }
-    };
-    BrowserState.prototype.getTabIndex = function (tabId) {
-        var index = -1;
-        for (var i = 0; i < this.tabs.length; i++) {
+    }
+    getTabIndex(tabId) {
+        let index = -1;
+        for (let i = 0; i < this.tabs.length; i++) {
             if (this.tabs[i].getId() === tabId) {
                 index = i;
                 break;
             }
         }
         return index;
-    };
-    return BrowserState;
-}());
+    }
+}
 exports.BrowserState = BrowserState;
-var BrowserTab = /** @class */ (function () {
-    function BrowserTab(json) {
+class BrowserTab {
+    constructor(json) {
         if (json) {
             this.id = json.id;
             this.instances = [];
-            for (var _i = 0, _a = json.instances; _i < _a.length; _i++) {
-                var t = _a[_i];
+            for (const t of json.instances) {
                 this.instances.push(new BrowserInstance(t));
             }
         }
     }
-    BrowserTab.prototype.getId = function () {
+    getId() {
         return this.id;
-    };
-    BrowserTab.prototype.getInstance = function (id) {
-        for (var _i = 0, _a = this.instances; _i < _a.length; _i++) {
-            var instance = _a[_i];
+    }
+    getInstance(id) {
+        for (const instance of this.instances) {
             if (instance.getId() === id) {
                 return instance;
             }
         }
         return undefined;
-    };
-    BrowserTab.prototype.getInstances = function () {
+    }
+    getInstances() {
         return this.instances;
-    };
-    BrowserTab.prototype.addInstance = function (url) {
+    }
+    addInstance(url) {
         return this.addInstanceAfterIndex(this.instances.length - 1, url);
-    };
-    BrowserTab.prototype.addInstanceAfterIndex = function (index, url) {
-        var inst = new BrowserInstance({
-            id: (0, uuid_1.v4)(),
-            url: url
+    }
+    addInstanceAfterIndex(index, url) {
+        const inst = new BrowserInstance({
+            id: (0, uuid_1.v4)(), url
         });
         this.instances.splice(index, 0, inst);
         return inst;
-    };
-    BrowserTab.prototype.removeInstance = function (instanceId) {
-        var index = this.getInstanceIndex(instanceId);
+    }
+    removeInstance(instanceId) {
+        const index = this.getInstanceIndex(instanceId);
         if (index >= 0) {
             this.instances.splice(index, 1);
         }
-    };
-    BrowserTab.prototype.getInstanceIndex = function (instanceId) {
-        var index = -1;
-        for (var i = 0; i < this.instances.length; i++) {
+    }
+    getInstanceIndex(instanceId) {
+        let index = -1;
+        for (let i = 0; i < this.instances.length; i++) {
             if (this.instances[i].getId() === instanceId) {
                 index = i;
                 break;
             }
         }
         return index;
-    };
-    return BrowserTab;
-}());
+    }
+}
 exports.BrowserTab = BrowserTab;
-var BrowserInstance = /** @class */ (function () {
-    function BrowserInstance(json) {
+class BrowserInstance {
+    constructor(json) {
         if (json) {
             this.id = json.id;
             this.url = json.url;
@@ -151,28 +141,27 @@ var BrowserInstance = /** @class */ (function () {
             this.icon = json.icon;
         }
     }
-    BrowserInstance.prototype.getId = function () {
+    getId() {
         return this.id;
-    };
-    BrowserInstance.prototype.getUrl = function () {
+    }
+    getUrl() {
         return this.url;
-    };
-    BrowserInstance.prototype.setUrl = function (url) {
+    }
+    setUrl(url) {
         this.url = url;
-    };
-    BrowserInstance.prototype.getTitle = function () {
+    }
+    getTitle() {
         return this.title;
-    };
-    BrowserInstance.prototype.setTitle = function (title) {
+    }
+    setTitle(title) {
         this.title = title;
-    };
-    BrowserInstance.prototype.getIcon = function () {
+    }
+    getIcon() {
         return this.icon;
-    };
-    BrowserInstance.prototype.setIcon = function (icon) {
+    }
+    setIcon(icon) {
         this.icon = icon;
-    };
-    return BrowserInstance;
-}());
+    }
+}
 exports.BrowserInstance = BrowserInstance;
 //# sourceMappingURL=UserData.js.map

@@ -1,5 +1,6 @@
 import { EventEmitter, Injectable, Output } from '@angular/core';
 import { BrowserTab } from '../../../../app/models/UserData';
+import { Logger } from '../../../../app/utilities/Logger';
 import { BrowserPaneComponent } from '../../components/browser-pane/browser-pane.component';
 import { UserDataService } from '../user-data-service/user-data-service.service';
 import { BrowserInstance } from './../../../../app/models/UserData';
@@ -38,7 +39,7 @@ export class BrowserManagerService {
   public registerInstance(pane: BrowserPaneComponent) {
     this.panes.set(pane.id, pane);
     pane.navigated.subscribe((e) => {
-      console.log(`Instance: ${e.instanceId} navigated to: ${e.url}`);
+      Logger.info(`Instance: ${e.instanceId} navigated to: ${e.url}`);
       this.userService.getBrowserData().getTab(e.tabId)?.getInstance(e.instanceId)?.setUrl(e.url);
       this.userService.syncToDataAccess();
       this.anyInstanceNavigated.emit({
@@ -50,7 +51,7 @@ export class BrowserManagerService {
   }
   public setSelectedTab(tabId: string) {
     if (this.selectedTab !== tabId) {
-      console.log('Focused tab changed to: ' + tabId);
+      Logger.info('Focused tab changed to: ' + tabId);
       this.selectedTab = tabId;
       this.setFocusedInstance(tabId, this.getSelectedTab().getInstances()[0].getId());
       this.selectedTabChanged.emit(this.selectedTab);
@@ -65,7 +66,7 @@ export class BrowserManagerService {
   public setFocusedInstance(tabId: string, focusedInstanceId: string) {
     if (!this.focusedInstances.has(tabId) || this.focusedInstances.get(tabId) !== focusedInstanceId) {
       this.focusedInstances.set(tabId, focusedInstanceId);
-      console.log('Focused instance changed to: ' + focusedInstanceId);
+      Logger.info('Focused instance changed to: ' + focusedInstanceId);
       this.focusedPaneChanged.emit(focusedInstanceId);
     }
   }
@@ -85,7 +86,7 @@ export class BrowserManagerService {
       this.setFocusedInstance(newTab.getId(), newTab.getInstances()[0].getId());
     }
     this.userService.syncToDataAccess();
-    console.log(`Added a new tab with id: ${newTab.getId()}`);
+    Logger.info(`Added a new tab with id: ${newTab.getId()}`);
     return newTab;
   }
   public removeTab(tabId: string) {
@@ -100,7 +101,7 @@ export class BrowserManagerService {
       }
     }
 
-    console.log(`Removed a new tab with id: ${tabId}`);
+    Logger.info(`Removed a new tab with id: ${tabId}`);
     this.userService.syncToDataAccess();
   }
   public addInstanceToTab(tabId: string, url: string): BrowserInstance {
@@ -114,7 +115,7 @@ export class BrowserManagerService {
     const existingInstance = tab.getInstance(instanceId);
     const inst = tab.addInstanceAfterIndex(existingIndex + 1, url ? url : existingInstance.getUrl());
     this.userService.syncToDataAccess();
-    console.log(`Added a new tab with id: ${tabId}`);
+    Logger.info(`Added a new tab with id: ${tabId}`);
     return inst;
   }
   public removeInstanceFromTab(tabId: string, instanceId: string) {
@@ -122,7 +123,7 @@ export class BrowserManagerService {
     const tab = this.userService.getBrowserData().getTab(tabId);
     const index = tab.getInstanceIndex(instanceId);
     tab.removeInstance(instanceId);
-    console.log('Removed instance with Id: ' + instanceId);
+    Logger.info('Removed instance with Id: ' + instanceId);
 
     // Clear the focused instance if that was this.
     if (this.focusedInstances.get(tabId) === instanceId) {
@@ -138,7 +139,7 @@ export class BrowserManagerService {
       this.setFocusedInstance(tab.getId(), inst.getId());
     }
 
-    console.log(`Removed an instance from tab: ${tabId} with instanceId: ${instanceId}`);
+    Logger.info(`Removed an instance from tab: ${tabId} with instanceId: ${instanceId}`);
     this.userService.syncToDataAccess();
   }
   public navigateFocusedInstance(url: string) {

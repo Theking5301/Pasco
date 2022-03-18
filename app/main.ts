@@ -1,10 +1,10 @@
-import * as electron from 'electron';
 import { app, BrowserWindow, ipcMain, screen } from 'electron';
 import * as contextMenu from 'electron-context-menu';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as url from 'url';
 import { ServiceCollection } from './ServiceCollections';
+import { Logger } from './utilities/Logger';
 
 export let MAIN_WINDOW: BrowserWindow = null;
 
@@ -29,6 +29,8 @@ function createWindow(): BrowserWindow {
     y: 0,
     width: size.width / 2,
     height: size.height / 2,
+    minWidth: 500,
+    minHeight: 500,
     webPreferences: {
       nodeIntegration: true,
       nodeIntegrationInSubFrames: false,
@@ -68,51 +70,11 @@ function createWindow(): BrowserWindow {
 
   // Emitted when the window is closed.
   MAIN_WINDOW.on('closed', () => {
-    // Dereference the window object, usually you would store window
-    // in an array if your app supports multi windows, this is the time
-    // when you should delete the corresponding element.
     MAIN_WINDOW = null;
   });
 
   return MAIN_WINDOW;
 }
-
-ipcMain.on('sparrow/maximize', (event) => {
-  const browserWindow = BrowserWindow.fromWebContents(event.sender);
-  if (browserWindow?.isMaximizable()) {
-    if (browserWindow.isMaximized()) {
-      browserWindow.unmaximize();
-    } else {
-      browserWindow.maximize();
-    }
-  }
-});
-
-ipcMain.on('sparrow/minimize', (event) => {
-  const browserWindow = BrowserWindow.fromWebContents(event.sender);
-  browserWindow?.minimize();
-});
-
-ipcMain.on('sparrow/close', (event) => {
-  const browserWindow = BrowserWindow.fromWebContents(event.sender);
-  browserWindow?.close();
-});
-
-ipcMain.on('windowMoving', (e, { mouseX, mouseY }) => {
-  // If we're maximized and moving, unmaximize.
-  const browserWindow = BrowserWindow.fromWebContents(e.sender);
-  if (browserWindow?.isMaximizable()) {
-    if (browserWindow.isMaximized()) {
-      browserWindow.unmaximize();
-    }
-  }
-
-  // Then move the window.
-  const { x, y } = electron.screen.getCursorScreenPoint()
-  MAIN_WINDOW.setPosition(x - mouseX, y - mouseY)
-});
-
-ipcMain.on('windowMoved', () => { });
 
 ipcMain.on('sparrow/get-platform', (event) => {
   event.sender.send('sparrow/platform', process.platform);
@@ -126,7 +88,11 @@ try {
   // initialization and is ready to create browser windows.
   // Some APIs can only be used after this event occurs.
   // Added 400 ms to fix the black background issue while using transparent window. More detais at https://github.com/electron/electron/issues/15947
-  app.on('ready', () => setTimeout(createWindow, 400));
+  app.on('ready', () => {
+    SERVICE_COLLECTION.initialize().then((resolve) => {
+      setTimeout(createWindow, 400);
+    })
+  });
 
   // Quit when all windows are closed.
   app.on('window-all-closed', () => {
@@ -157,8 +123,8 @@ try {
 }
 
 export function logToDevtools(message) {
-  console.log(message)
+  Logger.info(message)
   if (MAIN_WINDOW && MAIN_WINDOW.webContents) {
-    MAIN_WINDOW.webContents.executeJavaScript(`console.log("${message.toString()}")`)
+    MAIN_WINDOW.webContents.executeJavaScript(`Logger.info("${message.toString()}")`)
   }
 }

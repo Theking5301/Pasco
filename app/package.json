@@ -2,6 +2,10 @@
   "name": "Sparrow",
   "version": "1.0.0",
   "main": "main.js",
+  "author": {
+    "name": "Amine Sebastian",
+    "email": "amine@suburbandigital.com"
+  },
   "private": true,
   "dependencies": {
     "@types/sqlite3": "^3.1.8",
@@ -9,7 +13,6 @@
     "electron-context-menu": "3.1.2",
     "jwt-decode": "^3.1.2",
     "keytar": "7.9.0",
-    "module-alias": "^2.2.2",
     "sqlite3": "^5.0.2",
     "uuid": "8.3.2"
   },

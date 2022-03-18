@@ -1,17 +1,28 @@
+
 import * as axios from 'axios';
 import { ipcMain } from 'electron';
 import { v4 as uuidv4 } from 'uuid';
 import { BrowserInstance, BrowserTab, UserData } from '../../models/UserData';
+import { Logger } from '../../utilities/Logger';
+import { BaseService } from '../BaseService';
 import { ServiceCollection } from './../../ServiceCollections';
 
-export class UserDataAccess {
+export class UserDataAccess extends BaseService {
 
   public constructor() {
+    super();
     ipcMain.on('sparrow/user-data/update', async (event, data: any) => {
       const userData = new UserData(data);
-      await this.upsertUserData(userData);
-      await this.syncDataToCloud(userData);
+
+      // Wrap this for safety if the database or internet has a momentary hiccup.
+      const results = await Promise.allSettled([this.upsertUserData(userData), this.syncDataToCloud(userData)]);
+      for (const result of results) {
+        if (result.status === 'rejected') {
+          Logger.error(result.reason);
+        }
+      }
     });
+
 
     ipcMain.on('sparrow/user-data', async (event) => {
       // Capture the local and cloud profiles.
@@ -29,33 +40,37 @@ export class UserDataAccess {
       if (cloudProfile && localProfile) {
         if (cloudProfile.lastModified > localProfile.lastModified) {
           output = cloudProfile;
-          console.log('Loaded profile from the cloud.');
+          Logger.info('Loaded profile from the cloud.');
         } else {
           output = localProfile;
-          console.log('Loaded profile from local copy.');
+          Logger.info('Loaded profile from local copy.');
         }
       } else if (cloudProfile) {
         output = cloudProfile;
-        console.log('Loaded profile from the cloud.');
+        Logger.info('Loaded profile from the cloud.');
       } else if (localProfile) {
         output = localProfile;
-        console.log('Loaded profile from local copy.');
+        Logger.info('Loaded profile from local copy.');
       } else {
         output = await this.createDefaultUserData();
-        console.log('Initializing first time profile.');
+        Logger.info('Initializing first time profile.');
       }
 
       event.sender.send('sparrow/user-data', output);
     });
   }
+  public initialize(): Promise<void> {
+    return Promise.resolve();
+  }
   private async syncProfileFromCloud(): Promise<UserData> {
     if (!(await ServiceCollection.RAVEN.shouldPerformCloudOperations())) {
+      Logger.info('Skipping cloud sync -- user is not logged in or has expired token.');
       return undefined;
     }
 
-    const tokens = await ServiceCollection.RAVEN.getValidAccessToken(true);
+    const tokens = await ServiceCollection.RAVEN.getValidAccessToken(false);
     try {
-      const response = await axios.default.post<any>('http://localhost:8090/api/v1',
+      const response = await axios.default.post<any>('http://34.139.72.55/api/v1',
         {
           query:
             `query {
@@ -85,7 +100,7 @@ export class UserDataAccess {
       );
 
       if (response.data.data.profile) {
-        console.log(`Synced User Data from the cloud: ${response.data.data.profile}`);
+        Logger.info(`Synced User Data from the cloud: ${response.data.data.profile}`);
         return new UserData(response.data.data.profile);
       } else {
         return undefined;
@@ -96,12 +111,13 @@ export class UserDataAccess {
   }
   private async syncDataToCloud(data: UserData): Promise<void> {
     if (!(await ServiceCollection.RAVEN.shouldPerformCloudOperations())) {
+      Logger.info('Skipping cloud sync -- user is not logged in or has expired token.');
       return;
     }
 
-    const tokens = await ServiceCollection.RAVEN.getValidAccessToken(true);
+    const tokens = await ServiceCollection.RAVEN.getValidAccessToken(false);
     try {
-      await axios.default.post<any>('http://localhost:8090/api/v1',
+      await axios.default.post<any>('http://34.139.72.55/api/v1',
         {
           query:
             `mutation($profile: SparrowProfileInput!){
@@ -132,9 +148,9 @@ export class UserDataAccess {
           }
         }
       );
-      console.log(`Synced User Data to the cloud: ${data}`);
-    } catch (err) {
-      throw new Error(`"An error occurred when syncing profile data to the cloud. Error: ${err}`);
+      Logger.info(`Synced User Data to the cloud: ${data}`);
+    } catch (error) {
+      throw new Error(`"An error occurred when syncing profile data to the cloud. Error: ${error}`);
     }
   }
   private async upsertUserData(data: UserData): Promise<void> {
@@ -143,17 +159,18 @@ export class UserDataAccess {
       $RavenId: data.ravenId,
       $UserData: JSON.stringify(data)
     });
+    Logger.info(`Updated local profile: ${data}`);
   }
   private async getUserDataFromDatabase(): Promise<UserData> {
     try {
       const user = await ServiceCollection.RAVEN.getRavenTokens();
       const data = await ServiceCollection.DB.query('SELECT UserData from tbl_UserData where RavenId=$RavenId', { $RavenId: user.decodedToken.ravenId });
-      if (data) {
-        console.log(`Read profile: ${JSON.stringify(data)} from the database.`);
-        return new UserData(JSON.parse(data.userData));
+      if (data.UserData) {
+        Logger.info(`Read profile from the database: ${JSON.stringify(data.UserData)}`);
+        return new UserData(JSON.parse(data.UserData));
       }
     } catch (error) {
-      console.error(error);
+      throw new Error(`"An error occurred when syncing profile data to the database. Error: ${error}`);
     }
     return undefined;
   }

@@ -1,2 +1,2 @@
-npm run electron:build
+start npm run electron:build
 pause

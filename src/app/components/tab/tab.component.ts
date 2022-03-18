@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { AfterViewInit, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { BrowserManagerService } from '../../services/browser-manager/browser-manager.service';
 
 @Component({
@@ -6,7 +6,7 @@ import { BrowserManagerService } from '../../services/browser-manager/browser-ma
   templateUrl: './tab.component.html',
   styleUrls: ['./tab.component.scss']
 })
-export class TabComponent implements OnInit {
+export class TabComponent implements OnInit, AfterViewInit {
   @Input()
   public active: boolean;
   @Input()
@@ -19,6 +19,8 @@ export class TabComponent implements OnInit {
   }
 
   ngOnInit(): void {
+  }
+  ngAfterViewInit(): void {
   }
   public tabClicked(e): void {
     this.tabselected.emit(this.tabId);

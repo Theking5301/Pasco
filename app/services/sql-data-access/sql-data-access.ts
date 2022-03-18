@@ -2,11 +2,13 @@ import { app, ipcMain } from 'electron';
 import * as fs from 'fs';
 import * as sql from 'sqlite3';
 import { APP_DIRECTORY } from '../../main';
+import { BaseService } from '../BaseService';
 
-export class SQLDataAccess {
+export class SQLDataAccess extends BaseService {
   private database: sql.Database;
 
   public constructor() {
+    super();
     this.database = new sql.Database(app.getPath('userData').concat('\\database.db'));
 
     // Initialize database.
@@ -25,7 +27,9 @@ export class SQLDataAccess {
       }
     });
   }
-
+  public initialize(): Promise<void> {
+    return Promise.resolve();
+  }
   public query(query: string, params: any): Promise<any> {
     return new Promise<any>((resolve) => {
       this.database.get(query, params, (error, result) => {
