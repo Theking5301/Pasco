@@ -40,6 +40,7 @@ function createWindow(): BrowserWindow {
     },
     transparent: true,
     titleBarStyle: 'hidden',
+    trafficLightPosition: { x: 16, y: 14 }
   });
 
   if (IS_DEV) {
