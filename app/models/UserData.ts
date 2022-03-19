@@ -31,6 +31,9 @@ export class UserData {
     }
     return this.browsers[0];
   }
+  public addBrowserState() {
+    this.browsers.push(new BrowserState({ id: uuid() }));
+  }
 }
 export class BrowserState {
   private id: string;
@@ -129,6 +132,13 @@ export class BrowserTab {
       id: uuid(), url
     });
     this.instances.splice(index, 0, inst);
+    return inst;
+  }
+  public addInstanceBeforeIndex(index: number, url: string): BrowserInstance {
+    const inst = new BrowserInstance({
+      id: uuid(), url
+    });
+    this.instances.splice(Math.max(0, index), 0, inst);
     return inst;
   }
   public removeInstance(instanceId: string) {

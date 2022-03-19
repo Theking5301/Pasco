@@ -22,49 +22,53 @@ class UserDataAccess extends BaseService_1.BaseService {
             }
         });
         electron_1.ipcMain.on('sparrow/user-data', async (event) => {
-            // Capture the local and cloud profiles.
-            let cloudProfile = undefined;
-            let localProfile = undefined;
-            try {
-                cloudProfile = await this.syncProfileFromCloud();
-            }
-            catch (_a) { }
-            try {
-                localProfile = await this.getUserDataFromDatabase();
-            }
-            catch (_b) { }
-            // If either of them returned values, get the latest one and use that as the truth.
-            let output = undefined;
-            if (cloudProfile && localProfile) {
-                if (cloudProfile.lastModified > localProfile.lastModified) {
-                    output = cloudProfile;
-                    Logger_1.Logger.info('Loaded profile from the cloud.');
-                }
-                else {
-                    output = localProfile;
-                    Logger_1.Logger.info('Loaded profile from local copy.');
-                }
-            }
-            else if (cloudProfile) {
-                output = cloudProfile;
-                Logger_1.Logger.info('Loaded profile from the cloud.');
-            }
-            else if (localProfile) {
-                output = localProfile;
-                Logger_1.Logger.info('Loaded profile from local copy.');
-            }
-            else {
-                output = await this.createDefaultUserData();
-                Logger_1.Logger.info('Initializing first time profile.');
-            }
+            const output = await this.getProfileFromBestAvailableSource();
             event.sender.send('sparrow/user-data', output);
         });
     }
     initialize() {
         return Promise.resolve();
     }
+    async getProfileFromBestAvailableSource() {
+        // Capture the local and cloud profiles.
+        let cloudProfile = undefined;
+        let localProfile = undefined;
+        try {
+            cloudProfile = await this.syncProfileFromCloud();
+        }
+        catch (_a) { }
+        try {
+            localProfile = await this.getUserDataFromDatabase();
+        }
+        catch (_b) { }
+        // If either of them returned values, get the latest one and use that as the truth.
+        let output = undefined;
+        if (cloudProfile && localProfile) {
+            if (cloudProfile.lastModified > localProfile.lastModified) {
+                output = cloudProfile;
+                Logger_1.Logger.info('Loaded profile from the cloud.');
+            }
+            else {
+                output = localProfile;
+                Logger_1.Logger.info('Loaded profile from local copy.');
+            }
+        }
+        else if (cloudProfile) {
+            output = cloudProfile;
+            Logger_1.Logger.info('Loaded profile from the cloud.');
+        }
+        else if (localProfile) {
+            output = localProfile;
+            Logger_1.Logger.info('Loaded profile from local copy.');
+        }
+        else {
+            output = await this.createDefaultUserData();
+            Logger_1.Logger.info('Initializing first time profile.');
+        }
+        return output;
+    }
     async syncProfileFromCloud() {
-        if (!(await ServiceCollections_1.ServiceCollection.RAVEN.shouldPerformCloudOperations())) {
+        if (!(await ServiceCollections_1.ServiceCollection.RAVEN.areCloudOperationsEnabled())) {
             Logger_1.Logger.info('Skipping cloud sync -- user is not logged in or has expired token.');
             return undefined;
         }
@@ -107,7 +111,7 @@ class UserDataAccess extends BaseService_1.BaseService {
         }
     }
     async syncDataToCloud(data) {
-        if (!(await ServiceCollections_1.ServiceCollection.RAVEN.shouldPerformCloudOperations())) {
+        if (!(await ServiceCollections_1.ServiceCollection.RAVEN.areCloudOperationsEnabled())) {
             Logger_1.Logger.info('Skipping cloud sync -- user is not logged in or has expired token.');
             return;
         }

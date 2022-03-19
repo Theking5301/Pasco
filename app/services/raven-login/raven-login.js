@@ -39,16 +39,17 @@ class RavenLogin extends BaseService_1.BaseService {
         }
         // Handle the call to open the login window.
         electron_1.ipcMain.on('sparrow/open-raven-login', (event, data) => {
-            this.promptForRavenLogin();
+            const browserWindow = electron_1.BrowserWindow.fromWebContents(event.sender);
+            this.promptForRavenLogin(browserWindow);
         });
         // Handle requests to get the raven token.
         electron_1.ipcMain.on('sparrow/raven-token', async (event) => {
-            const token = await this.getValidAccessToken(false);
-            event.sender.send('sparrow/raven-token', token);
+            const tokens = await this.getValidAccessToken(false);
+            this.sentTokensToWebContents(event.sender, tokens);
         });
         electron_1.ipcMain.on('sparrow/raven-token-prompt', async (event) => {
-            const token = await this.getValidAccessToken(true);
-            event.sender.send('sparrow/raven-token', token);
+            const tokens = await this.getValidAccessToken(true, electron_1.BrowserWindow.fromWebContents(event.sender));
+            this.sentTokensToWebContents(event.sender, tokens);
         });
         // Only for windows.
         const gotTheLock = this.app.requestSingleInstanceLock();
@@ -58,11 +59,12 @@ class RavenLogin extends BaseService_1.BaseService {
         // This is only for windows.
         app.on('second-instance', (event, commandLine, workingDirectory) => {
             // Someone tried to run a second instance, we should focus our window.
-            if (main_1.MAIN_WINDOW) {
-                if (main_1.MAIN_WINDOW.isMinimized()) {
-                    main_1.MAIN_WINDOW.restore();
+            const firstWindow = main_1.APP.getWindows().length > 0 ? main_1.APP.getWindows()[0] : undefined;
+            if (firstWindow) {
+                if (firstWindow.isMinimized()) {
+                    firstWindow.restore();
                 }
-                main_1.MAIN_WINDOW.focus();
+                firstWindow.focus();
             }
             // Protocol handler for win32
             // argv: An array of the second instance’s (command line / deep linked) arguments
@@ -80,7 +82,7 @@ class RavenLogin extends BaseService_1.BaseService {
     initialize() {
         return Promise.resolve();
     }
-    async getValidAccessToken(promptIfInvalid) {
+    async getValidAccessToken(promptIfInvalid, window) {
         let tokens = await this.getRavenTokens();
         // If the token is expired, prompt for relog (later change this to use the refresh token).
         if (promptIfInvalid) {
@@ -89,7 +91,7 @@ class RavenLogin extends BaseService_1.BaseService {
                     (0, main_1.logToDevtools)(tokens.decodedToken.exp * 1000);
                     (0, main_1.logToDevtools)(Date.now());
                 }
-                await this.promptForRavenLogin();
+                await this.promptForRavenLogin(window);
                 tokens = await this.getRavenTokens();
             }
         }
@@ -117,21 +119,25 @@ class RavenLogin extends BaseService_1.BaseService {
             };
         }
     }
-    async shouldPerformCloudOperations() {
+    async areCloudOperationsEnabled() {
         return (await this.getRavenTokens()).accessToken !== undefined;
     }
     async handleRedirect(url) {
-        const tokens = this.stripTokensFromRedirect(url);
-        await keytar.setPassword('Raven', tokens.decodedToken.ravenId, tokens.rawResponse);
+        const parsedResponse = this.stripTokensFromRedirect(url);
+        await keytar.setPassword('Raven', parsedResponse.decodedToken.ravenId, parsedResponse.rawResponse);
         this.ravenWindow.close();
     }
-    promptForRavenLogin() {
+    promptForRavenLogin(browser) {
         if (this.ravenWindow && !this.ravenWindow.isDestroyed()) {
             this.ravenWindow.focus();
             return;
         }
-        const x = main_1.MAIN_WINDOW.getSize()[0] / 2 + main_1.MAIN_WINDOW.getPosition()[0] - (RAVEN_WINDOW_WIDTH / 2);
-        const y = main_1.MAIN_WINDOW.getSize()[1] / 2 + main_1.MAIN_WINDOW.getPosition()[1] - (RAVEN_WINDOW_HEIGHT / 2);
+        let x = (RAVEN_WINDOW_WIDTH / 2);
+        let y = (RAVEN_WINDOW_HEIGHT / 2);
+        if (browser) {
+            x = browser.getSize()[0] / 2 + browser.getPosition()[0] - (RAVEN_WINDOW_WIDTH / 2);
+            y = browser.getSize()[1] / 2 + browser.getPosition()[1] - (RAVEN_WINDOW_HEIGHT / 2);
+        }
         this.ravenWindow = new electron_1.BrowserWindow({
             x: x,
             y: y,
@@ -164,6 +170,9 @@ class RavenLogin extends BaseService_1.BaseService {
             tokens: tokens,
             decodedToken: (0, jwt_decode_1.default)(tokens.accessToken)
         };
+    }
+    sentTokensToWebContents(webContents, tokens) {
+        webContents.send('sparrow/raven-token', tokens);
     }
 }
 exports.RavenLogin = RavenLogin;

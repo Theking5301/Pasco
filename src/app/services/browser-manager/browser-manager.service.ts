@@ -118,6 +118,15 @@ export class BrowserManagerService {
     Logger.info(`Added a new tab with id: ${tabId}`);
     return inst;
   }
+  public addInstanceToTabBeforeInstance(tabId: string, instanceId: string, url?: string): BrowserInstance {
+    const tab = this.userService.getBrowserData().getTab(tabId);
+    const existingIndex = tab.getInstanceIndex(instanceId);
+    const existingInstance = tab.getInstance(instanceId);
+    const inst = tab.addInstanceAfterIndex(existingIndex - 1, url ? url : existingInstance.getUrl());
+    this.userService.syncToDataAccess();
+    Logger.info(`Added a new tab with id: ${tabId}`);
+    return inst;
+  }
   public removeInstanceFromTab(tabId: string, instanceId: string) {
     // Capture the index of the existing instance and remove it.
     const tab = this.userService.getBrowserData().getTab(tabId);
@@ -164,10 +173,10 @@ export class BrowserManagerService {
     return this.getFocusedBrowserPane().isReloading();
   }
   public canGoForward(): boolean {
-    return this.getFocusedBrowserPane().canGoForward();
+    return this.getFocusedBrowserPane().getCanGoForward();
   }
   public canGoBack(): boolean {
-    return this.getFocusedBrowserPane().canGoBack();
+    return this.getFocusedBrowserPane().getCanGoBack();
   }
   public getFocusedBrowserPane(): BrowserPaneComponent {
     return this.panes.get(this.getSelectedTabFocusedInstance().getId());

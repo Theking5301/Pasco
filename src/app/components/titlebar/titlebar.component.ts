@@ -18,9 +18,6 @@ export class TitlebarComponent implements OnInit {
 
   ngOnInit(): void {
   }
-  public titleBarDoubleClick() {
-    this.maximizeRestore();
-  }
   public close() {
     this.electron.ipcRenderer.send('sparrow/close');
   }

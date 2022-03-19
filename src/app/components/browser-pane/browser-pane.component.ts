@@ -1,11 +1,13 @@
-import { AfterViewInit, Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { Logger } from '../../../../app/utilities/Logger';
 import { BrowserManagerService } from '../../services/browser-manager/browser-manager.service';
 import { StaticDataService } from './../../services/static-data-service/static-data-service.service';
 import { UserDataService } from './../../services/user-data-service/user-data-service.service';
 
 const TOP_OVERLAY_TRIGGER_HEIGHT = 32;
+const SIDE_OVERLAY_TRIGGER_HEIGHT = 32;
 const TOP_OVERLAY_FADE_OFF_TIME = 1500;
+const DEBUG_OVERLAYS = false;
 
 @Component({
   selector: 'app-browser-pane',
@@ -17,24 +19,45 @@ export class BrowserPaneComponent implements OnInit, AfterViewInit {
   public id: string;
   @Input()
   public tabId: string;
+
   @Output()
   public navigated: EventEmitter<IPaneNavigatedEvent>;
+  @Output()
+  public startedLoading: EventEmitter<IPaneNavigatedEvent>;
+  @Output()
+  public finishedLoading: EventEmitter<IPaneNavigatedEvent>;
+
   @ViewChild('webview')
   private webview: any;
 
   public topOverlayHovered: boolean;
+  public leftOverlayHovered: boolean;
+  public rightOverlayHovered: boolean;
+
   public url: string;
   public preload: string;
+
   private webviewNative: any;
   private domLoaded: boolean;
   private firstTimeLoaded: boolean;
   private topButtonFadeOffTimeout: NodeJS.Timeout;
+  private leftButtonFadeOffTimeout: NodeJS.Timeout;
+  private rightButtonFadeOffTimeout: NodeJS.Timeout;
+  private isLoading: boolean;
+  private canGoBack: boolean;
+  private canGoForward: boolean;
 
-
-  constructor(private userService: UserDataService, private manager: BrowserManagerService, staticData: StaticDataService) {
-    this.domLoaded = false;
+  constructor(private userService: UserDataService, private manager: BrowserManagerService,
+    staticData: StaticDataService, private element: ElementRef) {
     this.navigated = new EventEmitter();
+    this.startedLoading = new EventEmitter();
+    this.finishedLoading = new EventEmitter();
+
+    this.domLoaded = false;
     this.preload = `file://${staticData.getStaticData().appDirectory}/preload.js`;
+    this.topOverlayHovered = false;
+    this.leftOverlayHovered = false;
+    this.rightOverlayHovered = false;
   }
 
   ngOnInit(): void {
@@ -77,14 +100,13 @@ export class BrowserPaneComponent implements OnInit, AfterViewInit {
         }, TOP_OVERLAY_FADE_OFF_TIME);
       }
 
+      // Capture the first time loaded state.
+      this.firstTimeLoaded = true;
 
       // If the page closed, close this instance too.
       this.webviewNative.addEventListener('close', () => {
         this.manager.removeInstanceFromTab(this.tabId, this.id);
       });
-
-      // Capture the first time loaded state.
-      this.firstTimeLoaded = true;
 
       // Modify the scrollbars.
       this.webviewNative.insertCSS(`
@@ -104,27 +126,46 @@ export class BrowserPaneComponent implements OnInit, AfterViewInit {
         }
         `);
     });
+    this.webviewNative.addEventListener('did-start-loading', (event) => {
+      this.startedLoading.emit();
+      this.isLoading = true;
+    });
 
-    this.webviewNative.addEventListener('did-navigate', (e) => {
+    this.webviewNative.addEventListener('did-stop-loading', (event) => {
+      this.finishedLoading.emit();
+      this.isLoading = false;
+    });
+
+    this.webviewNative.addEventListener('did-navigate', (event) => {
       this.domLoaded = true;
+      this.canGoBack = this.webviewNative.canGoBack();
+      this.canGoForward = this.webviewNative.canGoForward();
       this.navigated.emit({
         instanceId: this.id,
         tabId: this.tabId,
-        url: e.url
+        url: event.url
       });
     });
 
-    this.webviewNative.addEventListener('did-frame-navigate', (e) => {
-
+    this.webviewNative.addEventListener('did-navigate-in-page', (event) => {
+      this.domLoaded = true;
+      this.canGoBack = this.webviewNative.canGoBack();
+      this.canGoForward = this.webviewNative.canGoForward();
+      this.navigated.emit({
+        instanceId: this.id,
+        tabId: this.tabId,
+        url: event.url
+      });
     });
 
-
-    this.webviewNative.addEventListener('page-title-updated', (e) => {
-      this.userService.getBrowserData().getTab(this.tabId).getInstance(this.id).setTitle(e.title);
+    this.webviewNative.addEventListener('page-title-updated', (event) => {
+      this.userService.getBrowserData().getTab(this.tabId).getInstance(this.id).setTitle(event.title);
     });
 
-    this.webviewNative.addEventListener('page-favicon-updated', (e) => {
-      this.userService.getBrowserData().getTab(this.tabId).getInstance(this.id).setIcon(e.favicons[0]);
+    this.webviewNative.addEventListener('page-favicon-updated', (event) => {
+      if (event.favicons && event.favicons.length > 0) {
+        this.userService.getBrowserData().getTab(this.tabId).getInstance(this.id).setIcon(event.favicons[0]);
+      }
     });
   }
   public navigate(url: string): void {
@@ -152,22 +193,13 @@ export class BrowserPaneComponent implements OnInit, AfterViewInit {
     }
   }
   public isReloading(): boolean {
-    if (this.domLoaded) {
-      return this.webviewNative.isLoading();
-    }
-    return this.domLoaded;
+    return this.isLoading;
   }
-  public canGoForward(): boolean {
-    if (this.domLoaded) {
-      return this.webviewNative.canGoForward();
-    }
-    return false;
+  public getCanGoForward(): boolean {
+    return this.domLoaded && this.canGoForward;
   }
-  public canGoBack(): boolean {
-    if (this.domLoaded) {
-      return this.webviewNative.canGoBack();
-    }
-    return false;
+  public getCanGoBack(): boolean {
+    return this.domLoaded && this.canGoBack;
   }
   public hasLoadedFirstTime() {
     return this.firstTimeLoaded;
@@ -175,34 +207,49 @@ export class BrowserPaneComponent implements OnInit, AfterViewInit {
   public displayFocusedIndicator() {
     return this.focused() && this.manager.getSelectedTab().getInstances().length > 1;
   }
+  public displayCloseInstanceButton() {
+    return this.manager.getSelectedTab().getInstances().length > 1;
+  }
+  public displayTopOverlay(): boolean {
+    return DEBUG_OVERLAYS || this.topOverlayHovered;
+  }
+  public displayLeftOverlay(): boolean {
+    return DEBUG_OVERLAYS || this.leftOverlayHovered;
+  }
+  public displayRightOverlay(): boolean {
+    return DEBUG_OVERLAYS || this.rightOverlayHovered;
+  }
   public closeInstance() {
     this.manager.removeInstanceFromTab(this.tabId, this.id);
   }
-  public newInstance() {
+  public newInstanceAfter() {
     this.manager.addInstanceToTabAfterInstance(this.tabId, this.id, 'https://www.google.com');
   }
-  public overlayTopMouseEnter() {
-    this.topOverlayHovered = true;
-    clearTimeout(this.topButtonFadeOffTimeout);
-    this.topButtonFadeOffTimeout = setTimeout(() => {
-      this.topOverlayHovered = false;
-    }, TOP_OVERLAY_FADE_OFF_TIME);
-  }
-  public overlayTopMouseLeave() {
-    this.topOverlayHovered = false;
-  }
-
-  public displayCloseInstanceButton() {
-    return this.topOverlayHovered && this.manager.getSelectedTab().getInstances().length > 1;
-  }
-  public displayNewInstanceButton() {
-    return this.topOverlayHovered;
+  public newInstanceBefore() {
+    this.manager.addInstanceToTabBeforeInstance(this.tabId, this.id, 'https://www.google.com');
   }
   private webContentsMouseMove(e) {
+    const bounds = this.element.nativeElement.getBoundingClientRect();
+
     if (e.y <= TOP_OVERLAY_TRIGGER_HEIGHT) {
       this.overlayTopMouseEnter();
+      return;
     } else {
       this.overlayTopMouseLeave();
+    }
+
+    if (e.x <= SIDE_OVERLAY_TRIGGER_HEIGHT) {
+      this.overlayLeftMouseEnter();
+      return;
+    } else {
+      this.overlayLeftMouseLeave();
+    }
+
+    if (e.x >= bounds.width - SIDE_OVERLAY_TRIGGER_HEIGHT) {
+      this.overlayRightMouseEnter();
+      return;
+    } else {
+      this.overlayRightMouseLeave();
     }
   }
   private webContentsMouseDown(e) {
@@ -218,6 +265,36 @@ export class BrowserPaneComponent implements OnInit, AfterViewInit {
     } else if (e.button === 4) {
       this.webviewNative.goForward();
     }
+  }
+  private overlayTopMouseEnter() {
+    this.topOverlayHovered = true;
+    clearTimeout(this.topButtonFadeOffTimeout);
+    this.topButtonFadeOffTimeout = setTimeout(() => {
+      this.topOverlayHovered = false;
+    }, TOP_OVERLAY_FADE_OFF_TIME);
+  }
+  private overlayTopMouseLeave() {
+    this.topOverlayHovered = false;
+  }
+  private overlayLeftMouseEnter() {
+    this.leftOverlayHovered = true;
+    clearTimeout(this.leftButtonFadeOffTimeout);
+    this.leftButtonFadeOffTimeout = setTimeout(() => {
+      this.leftOverlayHovered = false;
+    }, TOP_OVERLAY_FADE_OFF_TIME);
+  }
+  private overlayLeftMouseLeave() {
+    this.leftOverlayHovered = false;
+  }
+  private overlayRightMouseEnter() {
+    this.rightOverlayHovered = true;
+    clearTimeout(this.rightButtonFadeOffTimeout);
+    this.rightButtonFadeOffTimeout = setTimeout(() => {
+      this.rightOverlayHovered = false;
+    }, TOP_OVERLAY_FADE_OFF_TIME);
+  }
+  private overlayRightMouseLeave() {
+    this.rightOverlayHovered = false;
   }
 }
 export interface IPaneNavigatedEvent {

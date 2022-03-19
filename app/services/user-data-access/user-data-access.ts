@@ -23,47 +23,49 @@ export class UserDataAccess extends BaseService {
       }
     });
 
-
     ipcMain.on('sparrow/user-data', async (event) => {
-      // Capture the local and cloud profiles.
-      let cloudProfile: UserData = undefined;
-      let localProfile: UserData = undefined;
-      try {
-        cloudProfile = await this.syncProfileFromCloud();
-      } catch { }
-      try {
-        localProfile = await this.getUserDataFromDatabase();
-      } catch { }
-
-      // If either of them returned values, get the latest one and use that as the truth.
-      let output: UserData = undefined;
-      if (cloudProfile && localProfile) {
-        if (cloudProfile.lastModified > localProfile.lastModified) {
-          output = cloudProfile;
-          Logger.info('Loaded profile from the cloud.');
-        } else {
-          output = localProfile;
-          Logger.info('Loaded profile from local copy.');
-        }
-      } else if (cloudProfile) {
-        output = cloudProfile;
-        Logger.info('Loaded profile from the cloud.');
-      } else if (localProfile) {
-        output = localProfile;
-        Logger.info('Loaded profile from local copy.');
-      } else {
-        output = await this.createDefaultUserData();
-        Logger.info('Initializing first time profile.');
-      }
-
+      const output = await this.getProfileFromBestAvailableSource();
       event.sender.send('sparrow/user-data', output);
     });
   }
   public initialize(): Promise<void> {
     return Promise.resolve();
   }
-  private async syncProfileFromCloud(): Promise<UserData> {
-    if (!(await ServiceCollection.RAVEN.shouldPerformCloudOperations())) {
+  public async getProfileFromBestAvailableSource(): Promise<UserData> {
+    // Capture the local and cloud profiles.
+    let cloudProfile: UserData = undefined;
+    let localProfile: UserData = undefined;
+    try {
+      cloudProfile = await this.syncProfileFromCloud();
+    } catch { }
+    try {
+      localProfile = await this.getUserDataFromDatabase();
+    } catch { }
+
+    // If either of them returned values, get the latest one and use that as the truth.
+    let output: UserData = undefined;
+    if (cloudProfile && localProfile) {
+      if (cloudProfile.lastModified > localProfile.lastModified) {
+        output = cloudProfile;
+        Logger.info('Loaded profile from the cloud.');
+      } else {
+        output = localProfile;
+        Logger.info('Loaded profile from local copy.');
+      }
+    } else if (cloudProfile) {
+      output = cloudProfile;
+      Logger.info('Loaded profile from the cloud.');
+    } else if (localProfile) {
+      output = localProfile;
+      Logger.info('Loaded profile from local copy.');
+    } else {
+      output = await this.createDefaultUserData();
+      Logger.info('Initializing first time profile.');
+    }
+    return output;
+  }
+  public async syncProfileFromCloud(): Promise<UserData> {
+    if (!(await ServiceCollection.RAVEN.areCloudOperationsEnabled())) {
       Logger.info('Skipping cloud sync -- user is not logged in or has expired token.');
       return undefined;
     }
@@ -110,7 +112,7 @@ export class UserDataAccess extends BaseService {
     }
   }
   private async syncDataToCloud(data: UserData): Promise<void> {
-    if (!(await ServiceCollection.RAVEN.shouldPerformCloudOperations())) {
+    if (!(await ServiceCollection.RAVEN.areCloudOperationsEnabled())) {
       Logger.info('Skipping cloud sync -- user is not logged in or has expired token.');
       return;
     }

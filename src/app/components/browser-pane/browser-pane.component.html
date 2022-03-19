@@ -1,19 +1,28 @@
 <div class="pane-container">
-  <div class="browser-overlay-top">
-    <div class="selection-indicator" [ngClass]="{'selection-indicator-visible': displayFocusedIndicator()}"></div>
-    <div class="overlay-top-buttons">
-      <button class="top-overlay-button close-button"
-        [ngClass]="{'top-overlay-button-visible': displayCloseInstanceButton()}" (click)="closeInstance()">
-        <img class="top-overlay-icon" src="assets/icons/close-tab.svg" alt="Close Instance" />
-      </button>
-      <div class="button-spacer"></div>
-      <button class="top-overlay-button new-instance-button"
-        [ngClass]="{'top-overlay-button-visible':  displayNewInstanceButton()}" (click)="newInstance()">
-        <img class="top-overlay-icon new-instance-icon" src="assets/icons/close-tab.svg" alt="New Instance" />
-      </button>
-    </div>
+
+  <div class="selection-indicator" [ngClass]="{'selection-indicator-visible': displayFocusedIndicator()}"></div>
+
+  <div class="browser-overlay-top" [ngClass]="{'browser-overlay-top-visible': displayTopOverlay()}">
+    <button *ngIf="displayCloseInstanceButton()" class="overlay-button close-button" (click)="closeInstance()">
+      <img class="overlay-icon" src="assets/icons/close-tab.svg" alt="Close Instance" />
+    </button>
   </div>
+
   <webview #webview class="web-view" [ngClass]="{'web-view-loaded': hasLoadedFirstTime()}" attr.src="{{ url }}"
     preload="{{preload}}">
   </webview>
+
+  <div class="browser-overlay-side browser-overlay-left"
+    [ngClass]="{'browser-overlay-side-visible': displayLeftOverlay()}">
+    <button class="overlay-button top-overlay-button-visible new-instance-button" (click)="newInstanceBefore()">
+      <img class="overlay-icon new-instance-icon" src="assets/icons/close-tab.svg" alt="New Instance" />
+    </button>
+  </div>
+
+  <div class="browser-overlay-side browser-overlay-right browser-overlay-side-visible"
+    [ngClass]="{'browser-overlay-side-visible': displayRightOverlay()}">
+    <button class="overlay-button top-overlay-button-visible new-instance-button" (click)="newInstanceAfter()">
+      <img class="overlay-icon new-instance-icon" src="assets/icons/close-tab.svg" alt="New Instance" />
+    </button>
+  </div>
 </div>
