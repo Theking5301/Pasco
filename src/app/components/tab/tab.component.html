@@ -5,7 +5,7 @@
   </div>
 
   <div class='tab-title'>{{getTabName()}}</div>
-  <button class="close-button" (click)="closeTab()">
-    <img class="close-icon" src="assets/icons/close-tab.svg" alt="Close Tab" />
-  </button>
+  <div class="close-button">
+    <img class="close-icon" src="assets/icons/close-tab.svg" alt="Close Tab" (click)="closeTab()" />
+  </div>
 </div>
