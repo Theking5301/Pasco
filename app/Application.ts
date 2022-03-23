@@ -1,35 +1,55 @@
-import { BrowserWindow, screen } from 'electron';
+import { App, BrowserWindow, screen, Size } from 'electron';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as url from 'url';
+import { IS_DEV } from './main';
+import { BrowserState } from './models/UserData';
 import { ServiceCollection } from "./ServiceCollections";
 
 export class Application {
+  public static SCREEN_SIZE: Size;
+  public static DEFAULT_WINDOW_SIZE: Size;
   private devMode: boolean;
   private windows: BrowserWindow[];
 
-  public constructor(isInDevelopmentMode: boolean) {
+  public constructor(private app: App, isInDevelopmentMode: boolean) {
     this.devMode = isInDevelopmentMode;
     this.windows = [];
+
+    let args = '--new-window';
+    if (IS_DEV) {
+      args += ` ${process.argv[1]} ${path.resolve(process.argv[2])} ${path.resolve(process.argv[3])}`;
+    }
+
+    app.setUserTasks([
+      {
+        program: process.execPath,
+        arguments: args,
+        iconPath: process.execPath,
+        iconIndex: 0,
+        title: 'New Window',
+        description: 'Create a new window'
+      }
+    ]);
   }
 
   public async initialize() {
+    Application.SCREEN_SIZE = screen.getPrimaryDisplay().workAreaSize;
+    Application.DEFAULT_WINDOW_SIZE = { width: Application.SCREEN_SIZE.width / 2, height: Application.SCREEN_SIZE.height / 2 };
     const userData = await ServiceCollection.USER_SERVICE.getProfileFromBestAvailableSource();
-    await this.createNewWindow();
+    for (const browser of userData.getBrowsers()) {
+      await this.createNewWindow(browser);
+    }
   }
   public getWindows(): BrowserWindow[] {
     return this.windows;
   }
-  public async createNewWindow(): Promise<BrowserWindow> {
-    const electronScreen = screen;
-    const size = electronScreen.getPrimaryDisplay().workAreaSize;
-
-    // Create the browser window.
+  public async createNewWindow(browserState?: BrowserState): Promise<BrowserWindow> {    // Create the browser window.
     const newWindow = new BrowserWindow({
-      x: 0,
-      y: 0,
-      width: size.width / 2,
-      height: size.height / 2,
+      x: browserState ? browserState.xPosition : 0,
+      y: browserState ? browserState.yPosition : 0,
+      width: browserState ? browserState.width : Application.DEFAULT_WINDOW_SIZE.width,
+      height: browserState ? browserState.height : Application.DEFAULT_WINDOW_SIZE.height,
       minWidth: 500,
       minHeight: 500,
       webPreferences: {
@@ -43,6 +63,10 @@ export class Application {
       titleBarStyle: 'hidden',
       trafficLightPosition: { x: 16, y: 14 }
     });
+
+    if (browserState && browserState.maximized) {
+      newWindow.maximize();
+    }
 
     if (this.devMode) {
       newWindow.webContents.openDevTools();
@@ -68,7 +92,14 @@ export class Application {
         protocol: 'file:',
         slashes: true
       }));
+
+      console.log(newWindow.id);
     }
+
+    newWindow.on('close', async () => {
+      // Let the user service know a window is closing.
+      await ServiceCollection.USER_SERVICE.onWindowClosed(newWindow);
+    });
 
     // Emitted when the window is closed. Remove the window from the window array.
     newWindow.on('closed', () => {

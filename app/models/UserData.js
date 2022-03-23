@@ -8,9 +8,10 @@ class UserData {
             this.version = json.version;
             this.ravenId = json.ravenId;
             this.lastModified = json.lastModified;
-            this.browsers = [];
-            for (const t of json.browsers) {
-                this.browsers.push(new BrowserState(t));
+            this.openBrowsers = [];
+            this.profiles = [];
+            for (const t of json.openBrowsers) {
+                this.openBrowsers.push(new BrowserState(t));
             }
         }
         if (!this.lastModified) {
@@ -18,15 +19,23 @@ class UserData {
         }
     }
     getBrowser(id) {
-        for (const browser of this.browsers) {
-            if (browser.getId() === id) {
-                return browser;
-            }
-        }
-        return this.browsers[0];
+        return this.openBrowsers[id];
     }
-    addBrowserState() {
-        this.browsers.push(new BrowserState({ id: (0, uuid_1.v4)() }));
+    getBrowsers() {
+        return this.openBrowsers;
+    }
+    setBrowser(state, index) {
+        this.openBrowsers[index] = state;
+    }
+    addBrowserState(state) {
+        this.openBrowsers.push(state);
+    }
+    addSavedProfile(profileName, browserId) {
+        const openBrowser = this.getBrowser(browserId - 1);
+        const profile = JSON.parse(JSON.stringify(openBrowser));
+        profile.name = profileName;
+        profile.id = (0, uuid_1.v4)();
+        this.profiles.push(profile);
     }
 }
 exports.UserData = UserData;
@@ -34,11 +43,20 @@ class BrowserState {
     constructor(json) {
         if (json) {
             this.id = json.id;
+            this.name = json.name;
+            this.xPosition = json.xPosition;
+            this.yPosition = json.yPosition;
+            this.width = json.width;
+            this.height = json.height;
+            this.maximized = json.maximized;
             this.tabs = [];
             for (const t of json.tabs) {
                 this.tabs.push(new BrowserTab(t));
             }
         }
+    }
+    getName() {
+        return this.name;
     }
     getId() {
         return this.id;
@@ -56,10 +74,9 @@ class BrowserState {
     }
     addTab(name, url) {
         const tab = new BrowserTab({
-            name,
             id: (0, uuid_1.v4)(),
             instances: [
-                new BrowserInstance({ id: (0, uuid_1.v4)(), url: url ? url : 'https://www.google.com' })
+                new BrowserInstance({ id: (0, uuid_1.v4)(), url: url ? url : 'https://www.google.com', title: '', icon: '' })
             ]
         });
         this.tabs.push(tab);
@@ -112,14 +129,14 @@ class BrowserTab {
     }
     addInstanceAfterIndex(index, url) {
         const inst = new BrowserInstance({
-            id: (0, uuid_1.v4)(), url
+            id: (0, uuid_1.v4)(), url, title: '', icon: ''
         });
         this.instances.splice(index, 0, inst);
         return inst;
     }
     addInstanceBeforeIndex(index, url) {
         const inst = new BrowserInstance({
-            id: (0, uuid_1.v4)(), url
+            id: (0, uuid_1.v4)(), url, title: '', icon: ''
         });
         this.instances.splice(Math.max(0, index), 0, inst);
         return inst;

@@ -62,21 +62,22 @@ export class RavenLogin extends BaseService {
 
     // This is only for windows.
     app.on('second-instance', (event, commandLine, workingDirectory) => {
-      // Someone tried to run a second instance, we should focus our window.
-      const firstWindow = APP.getWindows().length > 0 ? APP.getWindows()[0] : undefined;
-      if (firstWindow) {
-        if (firstWindow.isMinimized()) {
-          firstWindow.restore()
+      const url = commandLine.find((arg) => arg.startsWith('sd-sparrow://'));
+      if (url) {
+        // Someone tried to run a second instance, we should focus our window.
+        const firstWindow = APP.getWindows().length > 0 ? APP.getWindows()[0] : undefined;
+        if (firstWindow) {
+          if (firstWindow.isMinimized()) {
+            firstWindow.restore()
+          }
+          firstWindow.focus()
         }
-        firstWindow.focus()
-      }
 
-      // Protocol handler for win32
-      // argv: An array of the second instance’s (command line / deep linked) arguments
-      if (process.platform == 'win32') {
-        // Keep only command line / deep linked arguments
-        let url = commandLine.find((arg) => arg.startsWith('sd-sparrow://'));
-        this.handleRedirect(url);
+        if (process.platform == 'win32') {
+          this.handleRedirect(url);
+        }
+      } else {
+        APP.createNewWindow();
       }
     })
 

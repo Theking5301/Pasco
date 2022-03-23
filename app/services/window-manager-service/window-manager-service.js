@@ -27,16 +27,22 @@ class WindowManagerService extends BaseService_1.BaseService {
             browserWindow === null || browserWindow === void 0 ? void 0 : browserWindow.close();
         });
         electron_1.ipcMain.on('windowMoving', (e, { mouseX, mouseY }) => {
-            // If we're maximized and moving, unmaximize.
-            const browserWindow = electron_1.BrowserWindow.fromWebContents(e.sender);
-            if (browserWindow === null || browserWindow === void 0 ? void 0 : browserWindow.isMaximizable()) {
-                if (browserWindow.isMaximized()) {
-                    browserWindow.unmaximize();
-                }
-            }
             // Then move the window.
+            const browserWindow = electron_1.BrowserWindow.fromWebContents(e.sender);
             const { x, y } = electron.screen.getCursorScreenPoint();
-            browserWindow.setPosition(x - mouseX, y - mouseY);
+            const { newX, newY } = {
+                newX: x - mouseX,
+                newY: y - mouseY
+            };
+            if (Math.abs(newX - browserWindow.getPosition()[0]) >= 1 || Math.abs(newY - browserWindow.getPosition()[1]) >= 1) {
+                // If we're maximized and moving, unmaximize.
+                if (browserWindow === null || browserWindow === void 0 ? void 0 : browserWindow.isMaximizable()) {
+                    if (browserWindow.isMaximized()) {
+                        browserWindow.unmaximize();
+                    }
+                }
+                browserWindow.setPosition(newX, newY);
+            }
         });
         electron_1.ipcMain.on('windowMoved', () => { });
     }

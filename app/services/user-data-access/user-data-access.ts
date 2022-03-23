@@ -1,21 +1,28 @@
-
 import * as axios from 'axios';
-import { ipcMain } from 'electron';
+import { BrowserWindow, ipcMain } from 'electron';
 import { v4 as uuidv4 } from 'uuid';
-import { BrowserInstance, BrowserTab, UserData } from '../../models/UserData';
+import { Application } from '../../Application';
+import { BrowserInstance, BrowserState, BrowserTab, UserData } from '../../models/UserData';
 import { Logger } from '../../utilities/Logger';
 import { BaseService } from '../BaseService';
 import { ServiceCollection } from './../../ServiceCollections';
 
+
 export class UserDataAccess extends BaseService {
+  private cachedUserData: UserData;
 
   public constructor() {
     super();
-    ipcMain.on('sparrow/user-data/update', async (event, data: any) => {
-      const userData = new UserData(data);
+
+    ipcMain.on('sparrow/window-data/update', async (event, data: BrowserState) => {
+      // Get the window for this sender.
+      const windowIndex = BrowserWindow.fromWebContents(event.sender).id - 1;
+
+      // Update the user data.
+      this.cachedUserData.setBrowser(new BrowserState(data), windowIndex);
 
       // Wrap this for safety if the database or internet has a momentary hiccup.
-      const results = await Promise.allSettled([this.upsertUserData(userData), this.syncDataToCloud(userData)]);
+      const results = await Promise.allSettled([this.upsertUserData(this.cachedUserData), this.syncDataToCloud(this.cachedUserData)]);
       for (const result of results) {
         if (result.status === 'rejected') {
           Logger.error(result.reason);
@@ -23,13 +30,56 @@ export class UserDataAccess extends BaseService {
       }
     });
 
-    ipcMain.on('sparrow/user-data', async (event) => {
-      const output = await this.getProfileFromBestAvailableSource();
-      event.sender.send('sparrow/user-data', output);
+    ipcMain.on('sparrow/window-data', async (event) => {
+      // Get the sender's window id.
+      const window = BrowserWindow.fromWebContents(event.sender);
+      const windowIndex = window.id - 1;
+
+      // Get the current user data.
+      await this.getProfileFromBestAvailableSource();
+
+      // If we dont have browser window data for this window, create a new set and sync it.
+      let newBrowserStateCreated = false;
+      if (windowIndex >= this.cachedUserData.getBrowsers().length) {
+        this.cachedUserData.addBrowserState(this.createDefaultBrowserData(window));
+        Logger.info(`Creating new BrowserState for WindowIndex: ${windowIndex}.`);
+        newBrowserStateCreated = true;
+      }
+
+      // Send the browser data over to the sender.
+      Logger.info(`Sending the BrowserState for WindowIndex: ${windowIndex}.`);
+      event.sender.send('sparrow/window-data', this.cachedUserData.getBrowser(windowIndex));
+
+      // Check if we created a new browser. If we did, sync it.
+      // We do this last to ensure a failure here won't impact the user experience.
+      if (newBrowserStateCreated) {
+        Logger.info(`Syncing the new BrowserState for WindowIndex: ${windowIndex}.`);
+        await Promise.allSettled([this.upsertUserData(this.cachedUserData), this.syncDataToCloud(this.cachedUserData)]);
+      }
     });
   }
-  public initialize(): Promise<void> {
-    return Promise.resolve();
+
+  public async initialize(): Promise<void> {
+    return;
+  }
+  public async onWindowClosed(window: BrowserWindow): Promise<void> {
+    // Get the window and update its position.
+    const windowIndex = window.id - 1;
+    this.cachedUserData.getBrowser(windowIndex).xPosition = window.getPosition()[0];
+    this.cachedUserData.getBrowser(windowIndex).yPosition = window.getPosition()[1];
+    this.cachedUserData.getBrowser(windowIndex).width = window.getSize()[0];
+    this.cachedUserData.getBrowser(windowIndex).height = window.getSize()[1];
+    this.cachedUserData.getBrowser(windowIndex).maximized = window.isMaximized()
+
+    Logger.info(`Saving window state on close. WindowIndex: ${windowIndex}.`);
+
+    // Save the data.
+    const results = await Promise.allSettled([this.upsertUserData(this.cachedUserData), this.syncDataToCloud(this.cachedUserData)]);
+    for (const result of results) {
+      if (result.status === 'rejected') {
+        Logger.error(result.reason);
+      }
+    }
   }
   public async getProfileFromBestAvailableSource(): Promise<UserData> {
     // Capture the local and cloud profiles.
@@ -62,6 +112,8 @@ export class UserDataAccess extends BaseService {
       output = await this.createDefaultUserData();
       Logger.info('Initializing first time profile.');
     }
+
+    this.cachedUserData = output;
     return output;
   }
   public async syncProfileFromCloud(): Promise<UserData> {
@@ -176,28 +228,34 @@ export class UserDataAccess extends BaseService {
     }
     return undefined;
   }
-  private async createDefaultUserData(): Promise<UserData> {
+  private async createDefaultUserData(window?: BrowserWindow): Promise<UserData> {
     const tokens = await ServiceCollection.RAVEN.getRavenTokens();
     const ravenId = tokens?.decodedToken?.ravenId ? tokens.decodedToken.ravenId : 'LOCAL';
     return new UserData({
       version: '1',
       ravenId: ravenId,
-      browsers: [
-        {
+      openBrowsers: [this.createDefaultBrowserData(window)]
+    });
+  }
+  private createDefaultBrowserData(window?: BrowserWindow): BrowserState {
+    return new BrowserState({
+      id: window ? window.id : 1,
+      xPosition: window ? window.getPosition()[0] : 0,
+      yPosition: window ? window.getPosition()[1] : 0,
+      width: window ? window.getPosition()[0] : Application.DEFAULT_WINDOW_SIZE.width,
+      height: window ? window.getPosition()[1] : Application.DEFAULT_WINDOW_SIZE.height,
+      maximized: window ? window.isMaximized() : false,
+      name: 'Default',
+      tabs: [
+        new BrowserTab({
           id: uuidv4(),
-          tabs: [
-            new BrowserTab({
-              name: 'DefaultTab',
+          instances: [
+            new BrowserInstance({
               id: uuidv4(),
-              instances: [
-                new BrowserInstance({
-                  id: uuidv4(),
-                  url: 'https://www.google.com'
-                })
-              ]
+              url: 'https://www.google.com'
             })
           ]
-        }
+        })
       ]
     });
   }

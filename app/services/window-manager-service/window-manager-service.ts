@@ -29,17 +29,23 @@ export class WindowManagerService extends BaseService {
     });
 
     ipcMain.on('windowMoving', (e, { mouseX, mouseY }) => {
-      // If we're maximized and moving, unmaximize.
+      // Then move the window.
       const browserWindow = BrowserWindow.fromWebContents(e.sender);
-      if (browserWindow?.isMaximizable()) {
-        if (browserWindow.isMaximized()) {
-          browserWindow.unmaximize();
-        }
+      const { x, y } = electron.screen.getCursorScreenPoint();
+      const { newX, newY } = {
+        newX: x - mouseX,
+        newY: y - mouseY
       }
 
-      // Then move the window.
-      const { x, y } = electron.screen.getCursorScreenPoint()
-      browserWindow.setPosition(x - mouseX, y - mouseY)
+      if (Math.abs(newX - browserWindow.getPosition()[0]) >= 1 || Math.abs(newY - browserWindow.getPosition()[1]) >= 1) {
+        // If we're maximized and moving, unmaximize.
+        if (browserWindow?.isMaximizable()) {
+          if (browserWindow.isMaximized()) {
+            browserWindow.unmaximize();
+          }
+        }
+        browserWindow.setPosition(newX, newY);
+      }
     });
 
     ipcMain.on('windowMoved', () => { });

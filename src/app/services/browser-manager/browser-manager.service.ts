@@ -122,7 +122,7 @@ export class BrowserManagerService {
     const tab = this.userService.getBrowserData().getTab(tabId);
     const existingIndex = tab.getInstanceIndex(instanceId);
     const existingInstance = tab.getInstance(instanceId);
-    const inst = tab.addInstanceAfterIndex(existingIndex - 1, url ? url : existingInstance.getUrl());
+    const inst = tab.addInstanceAfterIndex(existingIndex, url ? url : existingInstance.getUrl());
     this.userService.syncToDataAccess();
     Logger.info(`Added a new tab with id: ${tabId}`);
     return inst;

@@ -8,7 +8,7 @@ const ARGS = process.argv.slice(1);
 export const APP_DIRECTORY = __dirname;
 export const IS_DEV = ARGS.some(val => val === '--serve');
 export const SERVICE_COLLECTION = new ServiceCollection(app, IS_DEV);
-export const APP: Application = new Application(IS_DEV);
+export const APP: Application = new Application(app, IS_DEV);
 
 contextMenu({
   prepend: (params, browserWindow) => [{

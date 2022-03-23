@@ -1,20 +1,23 @@
 import { v4 as uuid } from 'uuid';
 
+export interface IUserData {
+  version: string;
+  ravenId: string;
+  openBrowsers: BrowserState[];
+  lastModified?: number;
+  profiles?: BrowserState[];
+}
+export interface UserData extends IUserData { }
 export class UserData {
-  public version: string;
-  public ravenId: string;
-  public profile: string;
-  public lastModified: number;
-  private browsers: BrowserState[];
-
-  public constructor(json?: any) {
+  public constructor(json?: IUserData) {
     if (json) {
       this.version = json.version;
       this.ravenId = json.ravenId;
       this.lastModified = json.lastModified;
-      this.browsers = [];
-      for (const t of json.browsers) {
-        this.browsers.push(new BrowserState(t));
+      this.openBrowsers = [];
+      this.profiles = [];
+      for (const t of json.openBrowsers) {
+        this.openBrowsers.push(new BrowserState(t));
       }
     }
 
@@ -23,33 +26,57 @@ export class UserData {
     }
   }
 
-  public getBrowser(id: string): BrowserState {
-    for (const browser of this.browsers) {
-      if (browser.getId() === id) {
-        return browser;
-      }
-    }
-    return this.browsers[0];
+  public getBrowser(id: number): BrowserState {
+    return this.openBrowsers[id];
   }
-  public addBrowserState() {
-    this.browsers.push(new BrowserState({ id: uuid() }));
+  public getBrowsers(): BrowserState[] {
+    return this.openBrowsers;
+  }
+  public setBrowser(state: BrowserState, index: number) {
+    this.openBrowsers[index] = state;
+  }
+  public addBrowserState(state: BrowserState) {
+    this.openBrowsers.push(state);
+  }
+  public addSavedProfile(profileName: string, browserId: number) {
+    const openBrowser = this.getBrowser(browserId - 1);
+    const profile = JSON.parse(JSON.stringify(openBrowser));
+    profile.name = profileName;
+    profile.id = uuid();
+    this.profiles.push(profile);
   }
 }
+export interface IBrowserState {
+  id: number;
+  name: string;
+  xPosition: number;
+  yPosition: number;
+  width: number;
+  height: number;
+  maximized: boolean;
+  tabs: BrowserTab[];
+}
+export interface BrowserState extends IBrowserState { }
 export class BrowserState {
-  private id: string;
-  private tabs: BrowserTab[];
-
-  public constructor(json?: any) {
+  public constructor(json?: IBrowserState) {
     if (json) {
       this.id = json.id;
+      this.name = json.name;
+      this.xPosition = json.xPosition;
+      this.yPosition = json.yPosition;
+      this.width = json.width;
+      this.height = json.height;
+      this.maximized = json.maximized;
       this.tabs = [];
       for (const t of json.tabs) {
         this.tabs.push(new BrowserTab(t));
       }
     }
   }
-
-  public getId(): string {
+  public getName(): string {
+    return this.name;
+  }
+  public getId(): number {
     return this.id;
   }
   public getTab(id: string): BrowserTab {
@@ -67,10 +94,9 @@ export class BrowserState {
 
   public addTab(name: string, url?: string): BrowserTab {
     const tab = new BrowserTab({
-      name,
       id: uuid(),
       instances: [
-        new BrowserInstance({ id: uuid(), url: url ? url : 'https://www.google.com' })
+        new BrowserInstance({ id: uuid(), url: url ? url : 'https://www.google.com', title: '', icon: '' })
       ]
     });
     this.tabs.push(tab);
@@ -95,11 +121,13 @@ export class BrowserState {
     return index;
   }
 }
+export interface IBrowserTab {
+  id: string;
+  instances: BrowserInstance[];
+}
+export interface BrowserTab extends IBrowserTab { }
 export class BrowserTab {
-  private id: string;
-  private instances: BrowserInstance[];
-
-  public constructor(json?: any) {
+  public constructor(json?: IBrowserTab) {
     if (json) {
       this.id = json.id;
       this.instances = [];
@@ -129,14 +157,14 @@ export class BrowserTab {
   }
   public addInstanceAfterIndex(index: number, url: string): BrowserInstance {
     const inst = new BrowserInstance({
-      id: uuid(), url
+      id: uuid(), url, title: '', icon: ''
     });
     this.instances.splice(index, 0, inst);
     return inst;
   }
   public addInstanceBeforeIndex(index: number, url: string): BrowserInstance {
     const inst = new BrowserInstance({
-      id: uuid(), url
+      id: uuid(), url, title: '', icon: ''
     });
     this.instances.splice(Math.max(0, index), 0, inst);
     return inst;
@@ -160,14 +188,15 @@ export class BrowserTab {
   }
 }
 
+export interface IBrowserInstance {
+  id: string;
+  url: string;
+  title?: string;
+  icon?: string;
+}
+export interface BrowserInstance extends IBrowserInstance { }
 export class BrowserInstance {
-  private id: string;
-  private url: string;
-  private title: string;
-  private icon: string;
-
-
-  public constructor(json?: any) {
+  public constructor(json?: IBrowserInstance) {
     if (json) {
       this.id = json.id;
       this.url = json.url;

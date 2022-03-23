@@ -17,9 +17,6 @@ export class BrowserMenuComponent implements OnInit {
 
   constructor() {
     this.entryclicked = new EventEmitter();
-
-
-
     this.entries = new Map<string, IMenuEntry[]>();
     this.addEntry({ category: 'browser-functions', name: 'browser.menu.new_tab', action: 'new_tab' });
     this.addEntry({ category: 'browser-functions', name: 'browser.menu.close_tab', action: 'close_tab' });

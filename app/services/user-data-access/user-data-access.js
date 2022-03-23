@@ -4,6 +4,7 @@ exports.UserDataAccess = void 0;
 const axios = require("axios");
 const electron_1 = require("electron");
 const uuid_1 = require("uuid");
+const Application_1 = require("../../Application");
 const UserData_1 = require("../../models/UserData");
 const Logger_1 = require("../../utilities/Logger");
 const BaseService_1 = require("../BaseService");
@@ -11,23 +12,62 @@ const ServiceCollections_1 = require("./../../ServiceCollections");
 class UserDataAccess extends BaseService_1.BaseService {
     constructor() {
         super();
-        electron_1.ipcMain.on('sparrow/user-data/update', async (event, data) => {
-            const userData = new UserData_1.UserData(data);
+        electron_1.ipcMain.on('sparrow/window-data/update', async (event, data) => {
+            // Get the window for this sender.
+            const windowIndex = electron_1.BrowserWindow.fromWebContents(event.sender).id - 1;
+            // Update the user data.
+            this.cachedUserData.setBrowser(new UserData_1.BrowserState(data), windowIndex);
             // Wrap this for safety if the database or internet has a momentary hiccup.
-            const results = await Promise.allSettled([this.upsertUserData(userData), this.syncDataToCloud(userData)]);
+            const results = await Promise.allSettled([this.upsertUserData(this.cachedUserData), this.syncDataToCloud(this.cachedUserData)]);
             for (const result of results) {
                 if (result.status === 'rejected') {
                     Logger_1.Logger.error(result.reason);
                 }
             }
         });
-        electron_1.ipcMain.on('sparrow/user-data', async (event) => {
-            const output = await this.getProfileFromBestAvailableSource();
-            event.sender.send('sparrow/user-data', output);
+        electron_1.ipcMain.on('sparrow/window-data', async (event) => {
+            // Get the sender's window id.
+            const window = electron_1.BrowserWindow.fromWebContents(event.sender);
+            const windowIndex = window.id - 1;
+            // Get the current user data.
+            await this.getProfileFromBestAvailableSource();
+            // If we dont have browser window data for this window, create a new set and sync it.
+            let newBrowserStateCreated = false;
+            if (windowIndex >= this.cachedUserData.getBrowsers().length) {
+                this.cachedUserData.addBrowserState(this.createDefaultBrowserData(window));
+                Logger_1.Logger.info(`Creating new BrowserState for WindowIndex: ${windowIndex}.`);
+                newBrowserStateCreated = true;
+            }
+            // Send the browser data over to the sender.
+            Logger_1.Logger.info(`Sending the BrowserState for WindowIndex: ${windowIndex}.`);
+            event.sender.send('sparrow/window-data', this.cachedUserData.getBrowser(windowIndex));
+            // Check if we created a new browser. If we did, sync it.
+            // We do this last to ensure a failure here won't impact the user experience.
+            if (newBrowserStateCreated) {
+                Logger_1.Logger.info(`Syncing the new BrowserState for WindowIndex: ${windowIndex}.`);
+                await Promise.allSettled([this.upsertUserData(this.cachedUserData), this.syncDataToCloud(this.cachedUserData)]);
+            }
         });
     }
-    initialize() {
-        return Promise.resolve();
+    async initialize() {
+        return;
+    }
+    async onWindowClosed(window) {
+        // Get the window and update its position.
+        const windowIndex = window.id - 1;
+        this.cachedUserData.getBrowser(windowIndex).xPosition = window.getPosition()[0];
+        this.cachedUserData.getBrowser(windowIndex).yPosition = window.getPosition()[1];
+        this.cachedUserData.getBrowser(windowIndex).width = window.getSize()[0];
+        this.cachedUserData.getBrowser(windowIndex).height = window.getSize()[1];
+        this.cachedUserData.getBrowser(windowIndex).maximized = window.isMaximized();
+        Logger_1.Logger.info(`Saving window state on close. WindowIndex: ${windowIndex}.`);
+        // Save the data.
+        const results = await Promise.allSettled([this.upsertUserData(this.cachedUserData), this.syncDataToCloud(this.cachedUserData)]);
+        for (const result of results) {
+            if (result.status === 'rejected') {
+                Logger_1.Logger.error(result.reason);
+            }
+        }
     }
     async getProfileFromBestAvailableSource() {
         // Capture the local and cloud profiles.
@@ -65,6 +105,7 @@ class UserDataAccess extends BaseService_1.BaseService {
             output = await this.createDefaultUserData();
             Logger_1.Logger.info('Initializing first time profile.');
         }
+        this.cachedUserData = output;
         return output;
     }
     async syncProfileFromCloud() {
@@ -171,29 +212,35 @@ class UserDataAccess extends BaseService_1.BaseService {
         }
         return undefined;
     }
-    async createDefaultUserData() {
+    async createDefaultUserData(window) {
         var _a;
         const tokens = await ServiceCollections_1.ServiceCollection.RAVEN.getRavenTokens();
         const ravenId = ((_a = tokens === null || tokens === void 0 ? void 0 : tokens.decodedToken) === null || _a === void 0 ? void 0 : _a.ravenId) ? tokens.decodedToken.ravenId : 'LOCAL';
         return new UserData_1.UserData({
             version: '1',
             ravenId: ravenId,
-            browsers: [
-                {
+            openBrowsers: [this.createDefaultBrowserData(window)]
+        });
+    }
+    createDefaultBrowserData(window) {
+        return new UserData_1.BrowserState({
+            id: window ? window.id : 1,
+            xPosition: window ? window.getPosition()[0] : 0,
+            yPosition: window ? window.getPosition()[1] : 0,
+            width: window ? window.getPosition()[0] : Application_1.Application.DEFAULT_WINDOW_SIZE.width,
+            height: window ? window.getPosition()[1] : Application_1.Application.DEFAULT_WINDOW_SIZE.height,
+            maximized: window ? window.isMaximized() : false,
+            name: 'Default',
+            tabs: [
+                new UserData_1.BrowserTab({
                     id: (0, uuid_1.v4)(),
-                    tabs: [
-                        new UserData_1.BrowserTab({
-                            name: 'DefaultTab',
+                    instances: [
+                        new UserData_1.BrowserInstance({
                             id: (0, uuid_1.v4)(),
-                            instances: [
-                                new UserData_1.BrowserInstance({
-                                    id: (0, uuid_1.v4)(),
-                                    url: 'https://www.google.com'
-                                })
-                            ]
+                            url: 'https://www.google.com'
                         })
                     ]
-                }
+                })
             ]
         });
     }
